@@ -1,0 +1,37 @@
+# TLDR WP Plugin Translation Template
+# Copyright (C) 2024 Mathetos
+# This file is distributed under the same license as the TLDR WP package.
+msgid ""
+msgstr ""
+"Project-Id-Version: TLDR WP 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/mathetos/tldrwp/issues\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: WordPress Plugin\n"
+"X-Domain: tldrwp\n"
+
+#: tldrwp.php:XXX
+msgid "Invalid security token."
+msgstr ""
+
+#: tldrwp.php:XXX
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: tldrwp.php:XXX
+msgid "Post not found."
+msgstr ""
+
+#: tldrwp.php:XXX
+msgid "Post is not accessible."
+msgstr ""
+
+#: tldrwp.php:XXX
+msgid "TLDR WP plugin has been activated successfully!"
+msgstr ""

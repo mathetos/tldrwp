@@ -186,7 +186,7 @@ class TLDRWP {
     }
 
     /**
-     * Enqueue frontend scripts
+     * Enqueue frontend scripts and styles
      */
     public function enqueue_scripts() {
         // Only enqueue on single posts
@@ -194,6 +194,15 @@ class TLDRWP {
             return;
         }
 
+        // Enqueue CSS
+        wp_enqueue_style( 
+            'tldrwp-frontend', 
+            TLDRWP_PLUGIN_URL . 'assets/css/frontend.css', 
+            array(), 
+            TLDRWP_VERSION 
+        );
+
+        // Enqueue JavaScript
         wp_enqueue_script( 
             'tldrwp-frontend', 
             TLDRWP_PLUGIN_URL . 'assets/js/frontend.js', 
