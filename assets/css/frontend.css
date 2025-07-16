@@ -1,0 +1,396 @@
+/* TL;DR WP Frontend Styles */
+
+.tldrwp-container {
+    margin: 2rem 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.tldrwp-button-wrapper {
+    margin-bottom: 1rem;
+}
+
+
+
+/* Button Styles */
+.tldrwp-button {
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    transform: scale(1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 240px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Hover state */
+.tldrwp-button:hover {
+    background: linear-gradient(to right, #faf5ff, #fdf2f8, #eff6ff);
+    border-color: transparent;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+}
+
+/* Animated gradient border effect */
+.tldrwp-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    padding: 2px;
+    background: linear-gradient(to right, #9333ea, #ec4899, #2563eb);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.tldrwp-button:hover::before,
+.tldrwp-button:active::before {
+    opacity: 1;
+}
+
+/* Inner background to create border effect */
+.tldrwp-button::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 9999px;
+    background: white;
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+.tldrwp-button:hover::after {
+    background: linear-gradient(to right, #faf5ff, #fdf2f8, #eff6ff);
+}
+
+/* Disabled state */
+.tldrwp-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+.tldrwp-button:disabled:hover {
+    transform: scale(1);
+    background: transparent;
+    border-color: #e5e7eb;
+}
+
+.tldrwp-button:disabled::before {
+    opacity: 0;
+}
+
+.tldrwp-button.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+.tldrwp-button.loading:hover {
+    transform: scale(1);
+    background: transparent;
+    border-color: #e5e7eb;
+}
+
+.tldrwp-button.loading::before {
+    opacity: 0;
+}
+
+/* Button Icon */
+.tldrwp-button .tldrwp-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+    stroke: #374151;
+}
+
+.tldrwp-button.loading .tldrwp-icon {
+    animation: tldrwp-spin 1s linear infinite;
+}
+
+@keyframes tldrwp-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button Text Elements */
+.tldrwp-button-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.2;
+    display: block;
+    margin: 0;
+    pointer-events: none;
+}
+
+.tldrwp-button-desc {
+    font-size: 14px;
+    font-weight: 400;
+    color: #6b7280;
+    line-height: 1.2;
+    display: block;
+    margin: 0;
+    pointer-events: none;
+}
+
+/* Text wrapper for proper stacking */
+.tldrwp-button-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.tldrwp-button.loading .tldrwp-button-title {
+    color: #6b7280;
+}
+
+.tldrwp-button.loading .tldrwp-button-desc {
+    color: #9ca3af;
+}
+
+/* Loading Spinner */
+.tldrwp-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tldrwp-spinner .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: tldrwp-spin 1s linear infinite;
+}
+
+@keyframes tldrwp-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Content Area */
+.tldrwp-content {
+    margin-top: 1.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tldrwp-content.tldrwp-fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Summary Styles */
+.tldrwp-summary {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.tldrwp-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.tldrwp-summary-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tldrwp-summary-icon {
+    width: 20px;
+    height: 20px;
+    stroke: #667eea;
+    flex-shrink: 0;
+}
+
+.tldrwp-summary-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4a5568;
+    margin: 0;
+}
+
+.tldrwp-summary-content p {
+    margin: 0 0 1rem 0;
+}
+
+.tldrwp-summary-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Social Sharing Section */
+.tldrwp-social-sharing {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.tldrwp-social-sharing-text {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+}
+
+.tldrwp-social-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tldrwp-social-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    background: white;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+    margin: 0;
+    outline: none;
+}
+
+.tldrwp-social-button:hover {
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+
+.tldrwp-social-button svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* Error Styles */
+.tldrwp-error {
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+    border: 1px solid #fc8181;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.tldrwp-error p {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #c53030;
+    font-weight: 600;
+}
+
+.tldrwp-error-details {
+    font-size: 0.875rem !important;
+    color: #9b2c2c !important;
+    font-weight: 400 !important;
+    margin-top: 0.5rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tldrwp-button {
+        width: 100%;
+        min-width: auto;
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+    
+    .tldrwp-summary {
+        padding: 1.25rem;
+    }
+    
+    .tldrwp-summary-title {
+        font-size: 1.125rem;
+    }
+    
+    .tldrwp-summary-content {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tldrwp-container {
+        margin: 1.5rem 0;
+    }
+    
+    .tldrwp-button {
+        padding: 12px 16px;
+        font-size: 14px;
+        height: 44px;
+    }
+    
+    .tldrwp-summary {
+        padding: 1rem;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .tldrwp-button {
+        border: 2px solid currentColor;
+    }
+    
+    .tldrwp-summary {
+        border-width: 2px;
+    }
+    
+    .tldrwp-error {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .tldrwp-button,
+    .tldrwp-content,
+    .tldrwp-spinner .spinner {
+        transition: none;
+        animation: none;
+    }
+    
+    .tldrwp-button:hover {
+        transform: none;
+    }
+} 
