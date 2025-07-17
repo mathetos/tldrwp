@@ -974,17 +974,17 @@ function tldrwp_enqueue_frontend_assets() {
 
     wp_enqueue_script(
         'tldrwp-frontend',
-        plugins_url( 'assets/js/frontend.js', __FILE__ ),
+        plugins_url( 'public/js/frontend.js', __FILE__ ),
         array(),
-        filemtime( plugin_dir_path( __FILE__ ) . 'assets/js/frontend.js' ),
+        filemtime( plugin_dir_path( __FILE__ ) . 'public/js/frontend.js' ),
         true
     );
 
     wp_enqueue_style(
         'tldrwp-frontend',
-        plugins_url( 'assets/css/frontend.css', __FILE__ ),
+        plugins_url( 'public/css/frontend.css', __FILE__ ),
         array(),
-        filemtime( plugin_dir_path( __FILE__ ) . 'assets/css/frontend.css' )
+        filemtime( plugin_dir_path( __FILE__ ) . 'public/css/frontend.css' )
     );
 
     // Get settings for localization
