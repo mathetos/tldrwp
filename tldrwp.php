@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: TLDRWP AI Block
- * Description: Basic WordPress plugin boilerplate with a dynamic Gutenberg block that interacts with the AI Services plugin.
+ * Description: Let your readers generate a TL;DR of your content with AI.
  * Version: 0.1.0
- * Author: OpenAI Codex
+ * Author: Matt Cromwell
  * Requires Plugins: ai-services
  * Requires at least: 6.0
  * Requires PHP: 7.4
