@@ -117,10 +117,19 @@ class TLDRWP {
      * Initialize component classes.
      */
     private function init_components() {
+        // Core components (always needed)
         $this->settings_manager = new TLDRWP_Settings( $this );
         $this->ai_service = new TLDRWP_AI_Service( $this );
-        $this->admin = new TLDRWP_Admin( $this );
-        $this->public = new TLDRWP_Public( $this );
+        
+        // Admin component (only in admin context)
+        if ( is_admin() && class_exists( 'TLDRWP_Admin' ) ) {
+            $this->admin = new TLDRWP_Admin( $this );
+        }
+        
+        // Public component (needed for frontend and AJAX)
+        if ( class_exists( 'TLDRWP_Public' ) ) {
+            $this->public = new TLDRWP_Public( $this );
+        }
     }
 
     /**
@@ -208,7 +217,7 @@ class TLDRWP {
      * @return array
      */
     public function get_available_ai_platforms() {
-        return $this->ai_service->get_available_ai_platforms();
+        return isset( $this->ai_service ) ? $this->ai_service->get_available_ai_platforms() : array();
     }
 
     /**
@@ -217,7 +226,7 @@ class TLDRWP {
      * @return string
      */
     public function get_selected_ai_platform() {
-        return $this->ai_service->get_selected_ai_platform();
+        return isset( $this->ai_service ) ? $this->ai_service->get_selected_ai_platform() : '';
     }
 
     /**
@@ -227,7 +236,7 @@ class TLDRWP {
      * @return array
      */
     public function get_available_ai_models( $platform_slug = null ) {
-        return $this->ai_service->get_available_ai_models( $platform_slug );
+        return isset( $this->ai_service ) ? $this->ai_service->get_available_ai_models( $platform_slug ) : array();
     }
 
     /**
@@ -236,7 +245,7 @@ class TLDRWP {
      * @return string
      */
     public function get_selected_ai_model() {
-        return $this->ai_service->get_selected_ai_model();
+        return isset( $this->ai_service ) ? $this->ai_service->get_selected_ai_model() : '';
     }
 
     /**
@@ -245,14 +254,16 @@ class TLDRWP {
      * @return bool
      */
     public function check_ai_services() {
-        return $this->ai_service->check_ai_services();
+        return isset( $this->ai_service ) ? $this->ai_service->check_ai_services() : false;
     }
 
     /**
      * Test AI connection.
      */
     public function test_ai_connection() {
-        $this->ai_service->test_ai_connection();
+        if ( isset( $this->ai_service ) ) {
+            $this->ai_service->test_ai_connection();
+        }
     }
 
     /**
@@ -262,7 +273,7 @@ class TLDRWP {
      * @return string|false The AI response or false on failure.
      */
     public function call_ai_service( $prompt ) {
-        return $this->ai_service->call_ai_service( $prompt );
+        return isset( $this->ai_service ) ? $this->ai_service->call_ai_service( $prompt ) : false;
     }
 
     /**
@@ -272,6 +283,6 @@ class TLDRWP {
      * @return string Formatted response.
      */
     public function format_ai_response( $raw_response ) {
-        return $this->ai_service->format_ai_response( $raw_response );
+        return isset( $this->ai_service ) ? $this->ai_service->format_ai_response( $raw_response ) : '';
     }
 } 
