@@ -84,7 +84,7 @@ if ( count( $available_platforms ) > 1 ) {
     echo '<option>-- Select AI Platform --</option>';
     foreach ( $available_platforms as $slug => $name ) {
         $selected = ( $selected_platform === $slug ) ? 'selected' : '';
-        echo '<option value="' . esc_attr( $slug ) . '" ' . $selected . '>' . esc_html( $name ) . '</option>';
+        echo '<option value="' . esc_attr( $slug ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $name ) . '</option>';
     }
     echo '</select>';
 } else {

@@ -19,6 +19,8 @@ define( 'TLDRWP_VERSION', '0.1.0' );
 define( 'TLDRWP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'TLDRWP_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
+
+
 /**
  * Get default settings for TLDRWP
  */
@@ -142,9 +144,7 @@ function tldrwp_get_available_ai_models( $platform_slug = null ) {
                 
             } catch ( Exception $capability_exception ) {
                 // Fallback to manual filtering if capability filtering fails
-                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                    error_log( 'TLDRWP Warning: Capability filtering failed, using manual filter: ' . $capability_exception->getMessage() );
-                }
+                // Silently continue with manual filtering
             }
         }
         
@@ -161,9 +161,6 @@ function tldrwp_get_available_ai_models( $platform_slug = null ) {
         return $text_generation_models;
         
     } catch ( Exception $e ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( 'TLDRWP Error: Failed to get models for platform ' . $platform_slug . ': ' . $e->getMessage() );
-        }
         return array();
     }
 }
@@ -223,7 +220,7 @@ function tldrwp_check_ai_configuration() {
         add_action( 'admin_notices', function() {
             echo '<div class="notice notice-warning">
                 <p><strong>TLDRWP:</strong> ' . esc_html__( 'No AI service is configured. Please set up an AI provider in the AI Services plugin settings.', 'tldrwp' ) . '</p>
-                <p><a href="' . admin_url( 'options-general.php?page=ais_services' ) . '" class="button button-primary">' . esc_html__( 'Configure AI Services', 'tldrwp' ) . '</a></p>
+                <p><a href="' . esc_url( admin_url( 'options-general.php?page=ais_services' ) ) . '" class="button button-primary">' . esc_html__( 'Configure AI Services', 'tldrwp' ) . '</a></p>
             </div>';
         } );
     }
@@ -241,7 +238,7 @@ add_action( 'wp_ajax_nopriv_tldrwp_test_ai', 'tldrwp_test_ai_connection' );
  */
 function tldrwp_test_ai_connection() {
     // Verify nonce
-    if ( ! wp_verify_nonce( $_POST['nonce'], 'tldrwp_ajax_nonce' ) ) {
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
         wp_send_json_error( 'Security check failed' );
     }
 
@@ -295,9 +292,6 @@ function tldrwp_test_ai_connection() {
 function tldrwp_call_ai_service( $prompt ) {
     // Check if AI Services plugin is available
     if ( ! function_exists( 'ai_services' ) ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( 'TLDRWP Error: AI Services plugin function not available' );
-        }
         return '';
     }
 
@@ -309,17 +303,11 @@ function tldrwp_call_ai_service( $prompt ) {
         $selected_platform = tldrwp_get_selected_ai_platform();
         
         if ( empty( $selected_platform ) ) {
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                error_log( 'TLDRWP Error: No AI platform selected or available' );
-            }
             return '';
         }
         
         // Check if the selected service is available
         if ( ! $ai_services->is_service_available( $selected_platform ) ) {
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                error_log( 'TLDRWP Error: Selected AI platform is not available: ' . $selected_platform );
-            }
             return '';
         }
 
@@ -377,16 +365,9 @@ function tldrwp_call_ai_service( $prompt ) {
             }
         }
         
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( 'TLDRWP Error: Empty response from AI service' );
-        }
-    
         return '';
         
     } catch ( Exception $e ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( 'TLDRWP Error: ' . $e->getMessage() );
-        }
         return '';
     }
 }
@@ -646,7 +627,7 @@ function tldrwp_enabled_post_types_callback() {
     foreach ( $post_types as $post_type ) {
         $checked = in_array( $post_type->name, $enabled_types ) ? 'checked' : '';
         echo '<label style="display: block; margin-bottom: 5px;">';
-        echo '<input type="checkbox" name="tldrwp_settings[enabled_post_types][]" value="' . esc_attr( $post_type->name ) . '" ' . $checked . '>';
+        echo '<input type="checkbox" name="tldrwp_settings[enabled_post_types][]" value="' . esc_attr( $post_type->name ) . '" ' . esc_attr( $checked ) . '>';
         echo ' ' . esc_html( $post_type->labels->name );
         echo '</label>';
     }
@@ -716,7 +697,7 @@ function tldrwp_ai_platform_callback() {
     
     foreach ( $available_platforms as $slug => $name ) {
         $selected = ( $selected_platform === $slug ) ? 'selected' : '';
-        echo '<option value="' . esc_attr( $slug ) . '" ' . $selected . '>' . esc_html( $name ) . '</option>';
+        echo '<option value="' . esc_attr( $slug ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $name ) . '</option>';
     }
     
     echo '</select>';
@@ -748,7 +729,7 @@ function tldrwp_ai_model_callback() {
     foreach ( $available_models as $model_slug => $model_data ) {
         $selected = ( $selected_model === $model_slug ) ? 'selected' : '';
         $model_name = isset( $model_data['name'] ) ? $model_data['name'] : $model_slug;
-        echo '<option value="' . esc_attr( $model_slug ) . '" ' . $selected . '>' . esc_html( $model_name ) . '</option>';
+        echo '<option value="' . esc_attr( $model_slug ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $model_name ) . '</option>';
     }
     
     echo '</select>';
@@ -770,7 +751,7 @@ function tldrwp_ai_model_callback() {
                 
                 if (selectedPlatform) {
                     // Fetch available models for the selected platform
-                    fetch('<?php echo admin_url( 'admin-ajax.php' ); ?>', {
+                                            fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -778,7 +759,7 @@ function tldrwp_ai_model_callback() {
                         body: new URLSearchParams({
                             action: 'tldrwp_get_models',
                             platform: selectedPlatform,
-                            nonce: '<?php echo wp_create_nonce( 'tldrwp_ajax_nonce' ); ?>'
+                            nonce: '<?php echo esc_js( wp_create_nonce( 'tldrwp_ajax_nonce' ) ); ?>'
                         })
                     })
                     .then(response => response.json())
@@ -833,7 +814,7 @@ function tldrwp_test_connection_callback() {
                 try {
                     const formData = new FormData();
                     formData.append('action', 'tldrwp_test_ai');
-                    formData.append('nonce', '<?php echo wp_create_nonce( 'tldrwp_ajax_nonce' ); ?>');
+                    formData.append('nonce', '<?php echo esc_js( wp_create_nonce( 'tldrwp_ajax_nonce' ) ); ?>');
                     
                     const response = await fetch(ajaxurl, {
                         method: 'POST',
@@ -939,11 +920,16 @@ add_action( 'wp_ajax_tldrwp_get_models', 'tldrwp_ajax_get_models' );
  */
 function tldrwp_ajax_get_models() {
     // Verify nonce
-    if ( ! wp_verify_nonce( $_POST['nonce'], 'tldrwp_ajax_nonce' ) ) {
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
         wp_send_json_error( 'Security check failed' );
     }
 
-    $platform = sanitize_text_field( $_POST['platform'] );
+    // Validate and sanitize platform parameter
+    if ( ! isset( $_POST['platform'] ) ) {
+        wp_send_json_error( 'Platform parameter is required' );
+    }
+    
+    $platform = sanitize_text_field( wp_unslash( $_POST['platform'] ) );
     
     if ( empty( $platform ) ) {
         wp_send_json_error( 'Platform is required' );
@@ -1083,7 +1069,7 @@ function tldrwp_inject_tldr_button( $content ) {
  */
 function tldrwp_handle_ajax_request() {
     // Verify nonce
-    if ( ! wp_verify_nonce( $_POST['nonce'], 'tldrwp_ajax_nonce' ) ) {
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
         wp_send_json_error( __( 'Security check failed', 'tldrwp' ) );
     }
 
@@ -1092,8 +1078,17 @@ function tldrwp_handle_ajax_request() {
         wp_send_json_error( __( 'AI Services plugin is not active. Please install and configure the AI Services plugin.', 'tldrwp' ) );
     }
 
-    $prompt = sanitize_textarea_field( $_POST['prompt'] );
-    $content = sanitize_textarea_field( $_POST['content'] );
+    // Validate and sanitize input parameters
+    if ( ! isset( $_POST['prompt'] ) ) {
+        wp_send_json_error( __( 'Prompt parameter is required.', 'tldrwp' ) );
+    }
+    
+    if ( ! isset( $_POST['content'] ) ) {
+        wp_send_json_error( __( 'Content parameter is required.', 'tldrwp' ) );
+    }
+
+    $prompt = sanitize_textarea_field( wp_unslash( $_POST['prompt'] ) );
+    $content = sanitize_textarea_field( wp_unslash( $_POST['content'] ) );
 
     if ( empty( $prompt ) || empty( $content ) ) {
         wp_send_json_error( __( 'Missing required data.', 'tldrwp' ) );
@@ -1102,11 +1097,6 @@ function tldrwp_handle_ajax_request() {
     // Append HTML formatting instructions to the user's prompt
     $html_instructions = "\n\nPlease format your response as HTML with proper <ul> and <li> tags for any bullet points or lists. Use <p> tags for paragraphs and <strong> for emphasis.";
     $formatted_prompt = $prompt . $html_instructions . "\n\nContent to summarize:\n" . $content;
-
-    // Debug logging
-    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-        error_log( 'TLDRWP Debug: Processing request with prompt length: ' . strlen( $formatted_prompt ) );
-    }
 
     // Call AI service directly
     $raw_response = tldrwp_call_ai_service( $formatted_prompt );
@@ -1142,7 +1132,8 @@ function tldrwp_register_block() {
         'tldrwp-block',
         plugins_url( 'blocks/ai-chat/index.js', __FILE__ ),
         array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-api-fetch' ),
-        filemtime( plugin_dir_path( __FILE__ ) . 'blocks/ai-chat/index.js' )
+        filemtime( plugin_dir_path( __FILE__ ) . 'blocks/ai-chat/index.js' ),
+        true
     );
 
     wp_register_style(
@@ -1178,7 +1169,9 @@ function tldrwp_register_rest_routes() {
     register_rest_route( 'tldrwp/v1', '/chat', array(
         'methods'             => 'POST',
         'callback'            => 'tldrwp_handle_chat_request',
-        'permission_callback' => function() { return wp_verify_nonce( $_POST['nonce'] ?? '', 'tldrwp_nonce' ); },
+        'permission_callback' => function() { 
+        return isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_nonce' ); 
+    },
     ) );
 }
 

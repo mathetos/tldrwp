@@ -72,7 +72,7 @@ foreach ( $available_platforms as $platform_slug => $platform_name ) {
             $capabilities = isset( $model_data['capabilities'] ) ? implode( ', ', $model_data['capabilities'] ) : 'none';
             $has_text_generation = isset( $model_data['capabilities'] ) && in_array( 'text_generation', $model_data['capabilities'] );
             $capability_status = $has_text_generation ? '✅' : '❌';
-            echo '<li>' . $capability_status . ' <strong>' . esc_html( $model_name ) . '</strong> (' . esc_html( $model_slug ) . ') - Capabilities: ' . esc_html( $capabilities ) . '</li>';
+            echo '<li>' . esc_html( $capability_status ) . ' <strong>' . esc_html( $model_name ) . '</strong> (' . esc_html( $model_slug ) . ') - Capabilities: ' . esc_html( $capabilities ) . '</li>';
         }
         echo '</ul>';
         
