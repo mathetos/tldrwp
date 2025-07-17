@@ -671,22 +671,62 @@ class TLDRWP {
      * AJAX handler for getting models.
      */
     public function ajax_get_models() {
-        // This will be moved to the Admin class in Phase 2
-        // For now, we'll keep the existing function calls
-        if ( function_exists( 'tldrwp_ajax_get_models' ) ) {
-            tldrwp_ajax_get_models();
+        // Verify nonce
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
+            wp_send_json_error( __( 'Security check failed', 'tldrwp' ) );
         }
+
+        if ( ! isset( $_POST['platform'] ) ) {
+            wp_send_json_error( __( 'Platform parameter is required.', 'tldrwp' ) );
+        }
+
+        $platform = sanitize_text_field( wp_unslash( $_POST['platform'] ) );
+        $models = $this->get_available_ai_models( $platform );
+        
+        $model_names = array();
+        foreach ( $models as $model_slug => $model_data ) {
+            $model_names[ $model_slug ] = isset( $model_data['name'] ) ? $model_data['name'] : $model_slug;
+        }
+        
+        wp_send_json_success( $model_names );
     }
 
     /**
      * Enqueue frontend assets.
      */
     public function enqueue_frontend_assets() {
-        // This will be moved to the Public class in Phase 2
-        // For now, we'll keep the existing function calls
-        if ( function_exists( 'tldrwp_enqueue_frontend_assets' ) ) {
-            tldrwp_enqueue_frontend_assets();
+        // Only enqueue on single posts/pages where the button might appear
+        if ( ! is_singular() ) {
+            return;
         }
+
+        $current_post_type = get_post_type();
+        
+        if ( ! in_array( $current_post_type, $this->settings['enabled_post_types'] ) ) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'tldrwp-frontend',
+            TLDRWP_PLUGIN_URL . 'public/js/frontend.js',
+            array( 'jquery' ),
+            TLDRWP_VERSION,
+            true
+        );
+
+        wp_enqueue_style(
+            'tldrwp-frontend',
+            TLDRWP_PLUGIN_URL . 'public/css/frontend.css',
+            array(),
+            TLDRWP_VERSION
+        );
+
+        // Localize script with settings and nonce
+        wp_localize_script( 'tldrwp-frontend', 'tldrwp_ajax', array(
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce' => wp_create_nonce( 'tldrwp_ajax_nonce' ),
+            'enable_social_sharing' => $this->settings['enable_social_sharing']
+        ) );
     }
 
     /**
