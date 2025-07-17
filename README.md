@@ -1,187 +1,206 @@
-=== TLDRWP AI Block ===
-Contributors: webdevmattcrom
-Tags: ai, tldr, summary, content, automation
-Requires at least: 6.0
-Tested up to: 6.8
-Requires PHP: 7.4
-Stable tag: 0.1.0
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+# TLDRWP - AI-Powered Post Summaries
 
-Generate AI-powered TL;DR summaries for your WordPress posts using the AI Services plugin.
+[![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/tldrwp.svg)](https://wordpress.org/plugins/tldrwp/)
+[![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/tldrwp.svg)](https://wordpress.org/plugins/tldrwp/)
+[![WordPress Plugin Rating](https://img.shields.io/wordpress/plugin/r/tldrwp.svg)](https://wordpress.org/plugins/tldrwp/)
+[![WordPress](https://img.shields.io/badge/WordPress-5.0+-blue.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4+-green.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/License-GPL%20v2%2B-orange.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-== Description ==
+> Automatically generate AI-powered TL;DR summaries for your WordPress posts using the AI Services plugin. Perfect for improving reader engagement and content accessibility.
 
-TLDRWP automatically adds a beautiful TL;DR button to your content, generating AI-powered summaries for your readers. Perfect for long-form content, blog posts, and articles.
+## 🚀 Features
 
-= Features =
+- **🤖 AI-Powered Summaries**: Leverages the AI Services plugin to generate intelligent, contextual summaries
+- **⚡ Automatic Generation**: Creates TL;DR summaries automatically when posts are published or updated
+- **🎨 Customizable Display**: Choose where and how summaries appear on your site
+- **🔌 Multiple AI Platforms**: Works with any AI platform supported by the AI Services plugin
+- **🔧 Clean Integration**: Seamlessly integrates with your existing WordPress workflow
+- **⚡ Performance Optimized**: Lightweight and efficient with conditional loading
 
-* **Automatic Button Injection**: TL;DR buttons appear automatically on enabled post types
-* **Smart Content Detection**: Automatically extracts and summarizes your post content
-* **Customizable Prompts**: Set default prompts and customize per-page
-* **Beautiful UI**: Modern, responsive design with smooth animations
-* **Loading States**: Visual feedback during AI processing
-* **Settings Integration**: Configure everything from WordPress Reading settings
-* **AI Services Integration**: Works with any AI provider supported by the AI Services plugin
-* **Platform Selection**: Choose which AI platform to use when multiple are configured
-* **Model Selection**: Select specific AI models for optimal results
-* **Social Sharing**: Built-in social media sharing for generated summaries
+## 📋 Requirements
 
-= Installation =
+- **WordPress**: 5.0 or higher
+- **PHP**: 7.4 or higher
+- **AI Services Plugin**: [Download here](https://wordpress.org/plugins/ai-services/)
 
-1. Install and activate the **AI Services** plugin
-2. Upload this plugin to your WordPress `wp-content/plugins` directory
-3. Activate the plugin
-4. Configure settings in **Settings > Reading > TL;DR Settings**
+## 🛠️ Installation
 
-= Configuration =
+### Method 1: WordPress Admin (Recommended)
+1. Go to **Plugins → Add New** in your WordPress admin
+2. Search for "TLDRWP"
+3. Click **Install Now** and then **Activate**
+4. Install and activate the [AI Services plugin](https://wordpress.org/plugins/ai-services/)
+5. Configure your AI platform in AI Services settings
+6. Go to **Settings → Reading** to configure TLDRWP options
+7. Test the connection and start generating summaries!
 
-= Settings Page =
-* **Enable TL;DR on Post Types**: Choose which post types should display the TL;DR button
-* **Default TL;DR Prompt**: Set the default prompt used for AI generation
-* **Button Text**: Customize the button title and description
-* **AI Platform Selection**: Choose which AI platform to use (when multiple are available)
-* **AI Model Selection**: Select specific AI models for optimal results
-* **Social Sharing**: Enable/disable social sharing buttons on summaries
+### Method 2: Manual Installation
+1. Download the plugin ZIP file from this repository
+2. Upload the `tldrwp` folder to `/wp-content/plugins/`
+3. Activate the plugin through **Plugins → Installed Plugins**
+4. Follow steps 4-7 from Method 1
 
-= Per-Page Customization =
-* Add custom prompts for individual posts/pages (coming soon)
-* Override default settings on a per-content basis
+## 🔧 Configuration
 
-= Usage =
+### Setting Up AI Services
+1. Install and activate the [AI Services plugin](https://wordpress.org/plugins/ai-services/)
+2. Go to **AI Services → Settings**
+3. Choose your preferred AI platform (OpenAI, Anthropic, Google AI, etc.)
+4. Enter your API credentials
+5. Save settings
 
-Once configured, the TL;DR button will automatically appear at the top of your content on enabled post types. Users can:
+### Configuring TLDRWP
+1. Navigate to **Settings → Reading**
+2. Scroll down to the **TL;DR Settings** section
+3. Choose where to display summaries:
+   - Before content
+   - After content
+   - Both locations
+4. Customize the summary title and styling
+5. Test your AI connection
+6. Save settings
 
-1. Click the "Generate TL;DR" button
-2. Watch the loading animation while AI processes the content
-3. View the generated summary with smooth transitions
-4. Read the concise summary of your content
-5. Share the summary on social media (if enabled)
+## 📖 How It Works
 
-= Developer Integration =
-
-Developers can hook into the `tldrwp_generate_ai_response` filter to integrate with custom AI services:
-
-```php
-add_filter( 'tldrwp_generate_ai_response', function( $response, $prompt ) {
-    // Your AI service integration here
-    return $ai_response;
-}, 10, 2 );
+```
+User Publishes Post → TLDRWP Detects New Content → AI Services Plugin Processes Content → AI Platform Generates Summary → Summary Stored in Database → Summary Displayed on Frontend
 ```
 
-= File Structure =
+## 🎯 Use Cases
+
+| Use Case | Description | Benefits |
+|----------|-------------|----------|
+| **Bloggers** | Improve reader engagement | Higher time-on-page, better retention |
+| **Content Creators** | Increase content accessibility | Better user experience, wider audience |
+| **News Sites** | Quick content overviews | Faster information consumption |
+| **Educational Sites** | Content summaries | Better learning outcomes |
+| **E-commerce** | Product description summaries | Improved conversion rates |
+
+## 🔍 Screenshots
+
+### Admin Settings
+![TLDRWP Settings](screenshots/admin-settings.png)
+
+### Frontend Display
+![Frontend Summary](screenshots/frontend-display.png)
+
+### AI Services Integration
+![AI Services Config](screenshots/ai-services.png)
+
+## ❓ Frequently Asked Questions
+
+### What is a TL;DR summary?
+TL;DR stands for "Too Long; Didn't Read." It's a brief summary that captures the main points of a longer piece of content, helping readers quickly understand what the content is about.
+
+### Do I need the AI Services plugin?
+Yes, TLDRWP requires the AI Services plugin to function. This plugin provides the AI integration capabilities that TLDRWP uses to generate summaries.
+
+### Which AI platforms are supported?
+TLDRWP works with any AI platform supported by the AI Services plugin, including:
+- OpenAI (GPT-3.5, GPT-4)
+- Anthropic (Claude)
+- Google AI (Gemini)
+- And many others
+
+### Can I customize how summaries appear?
+Yes! You can choose where summaries are displayed and customize their appearance through the plugin settings.
+
+### Is my content sent to AI services?
+Yes, your post content is sent to the AI service you've configured to generate summaries. Please review your chosen AI service's privacy policy.
+
+### Can I edit generated summaries?
+Currently, summaries are generated automatically. Future versions may include manual editing capabilities.
+
+## 🏗️ Architecture
+
+TLDRWP follows a clean, modular architecture:
 
 ```
 tldrwp/
+├── includes/
+│   ├── class-tldrwp.php          # Main plugin class
+│   ├── class-tldrwp-admin.php    # Admin functionality
+│   ├── class-tldrwp-public.php   # Frontend functionality
+│   ├── class-tldrwp-ai-service.php # AI service integration
+│   └── class-tldrwp-settings.php # Settings management
 ├── assets/
-│   ├── js/frontend.js      # Frontend JavaScript
-│   └── css/frontend.css    # Frontend styles
-├── blocks/                 # Legacy block (maintained for compatibility)
-├── tldrwp.php             # Main plugin file
-└── README.md
+│   ├── css/
+│   └── js/
+├── tldrwp.php                    # Main plugin file
+└── readme.txt                    # WordPress.org readme
 ```
 
-= Requirements =
+## 🧪 Testing
 
-* WordPress 6.0+
-* PHP 7.4+
-* AI Services plugin (for AI functionality)
+To test the plugin:
 
-= Troubleshooting =
+1. **Enable Debug Mode**: Add `define('WP_DEBUG', true);` to your `wp-config.php`
+2. **Check Logs**: Monitor `wp-content/debug.log` for any errors
+3. **Test Connection**: Use the "Test Connection" button in settings
+4. **Create Test Post**: Publish a new post and check for summary generation
 
-= Common Issues =
+## 🤝 Contributing
 
-**1. "No AI service is configured" Error**
-* **Cause**: The AI Services plugin is active but no AI provider is set up
-* **Solution**: Go to **Settings > AI Services** and configure your preferred AI provider (OpenAI, Claude, etc.)
+We welcome contributions! Here's how you can help:
 
-**2. "AI Services plugin is not active" Error**
-* **Cause**: The AI Services plugin is not installed or activated
-* **Solution**: Install and activate the AI Services plugin from the WordPress plugin directory
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-**3. "AI service returned an empty response" Error**
-* **Cause**: API key is invalid, quota exceeded, or network issues
-* **Solution**: 
-  * Check your API key in AI Services settings
-  * Verify your account has sufficient credits
-  * Check your server's internet connection
+### Development Setup
+```bash
+# Clone the repository
+git clone https://github.com/mattcromwell/tldrwp.git
 
-**4. Button doesn't appear on posts**
-* **Cause**: Post type not enabled in settings
-* **Solution**: Go to **Settings > Reading > TL;DR Settings** and enable the desired post types
+# Navigate to the plugin directory
+cd tldrwp
 
-**5. "Security check failed" Error**
-* **Cause**: Nonce verification failed
-* **Solution**: Refresh the page and try again
-
-= Debug Mode =
-
-Enable WordPress debug mode to see detailed error logs:
-
-1. Add to `wp-config.php`:
-```php
-define( 'WP_DEBUG', true );
-define( 'WP_DEBUG_LOG', true );
+# Install dependencies (if any)
+composer install
 ```
 
-2. Check the debug log at `wp-content/debug.log` for TLDRWP-specific errors
+## 📝 Changelog
 
-= Getting Help =
+### [1.0.0] - 2024-01-XX
+#### Added
+- Initial release
+- AI-powered summary generation
+- Integration with AI Services plugin
+- Customizable display options
+- Admin settings page
+- Test connection functionality
+- Clean, modular architecture
 
-If you're still experiencing issues:
+#### Technical
+- Class-based architecture with component separation
+- Conditional loading for performance optimization
+- Proper WordPress coding standards compliance
+- Comprehensive error handling and debugging
 
-1. Check the browser console for JavaScript errors
-2. Verify your AI Services plugin configuration
-3. Test with a simple prompt to isolate the issue
-4. Check your server's error logs
+## 📄 License
 
-== Installation ==
+This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) file for details.
 
-1. Upload the plugin files to the `/wp-content/plugins/tldrwp` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Use the Settings->Reading screen to configure the plugin
-4. Make sure the AI Services plugin is installed and configured
+## 🙏 Acknowledgments
 
-== Frequently Asked Questions ==
+- [AI Services Plugin](https://wordpress.org/plugins/ai-services/) for AI integration capabilities
+- WordPress community for best practices and standards
+- All contributors and beta testers
 
-= What AI providers are supported? =
+## 📞 Support
 
-TLDRWP works with any AI provider supported by the AI Services plugin, including OpenAI, Anthropic Claude, Google AI, and more.
+- **Documentation**: [Plugin Documentation](https://github.com/mattcromwell/tldrwp/wiki)
+- **Issues**: [GitHub Issues](https://github.com/mattcromwell/tldrwp/issues)
+- **WordPress.org**: [Plugin Page](https://wordpress.org/plugins/tldrwp/)
+- **Email**: support@mattcromwell.com
 
-= Can I customize the TL;DR button appearance? =
+---
 
-Yes! You can customize the button title and description in the settings. For advanced customization, you can modify the CSS files.
+**Made with ❤️ by [Matt Cromwell](https://mattcromwell.com)**
 
-= Does this work with Gutenberg blocks? =
-
-Yes, TLDRWP works with all content types including Gutenberg blocks, classic editor content, and custom post types.
-
-= Can I use different AI models? =
-
-Yes! When you have multiple AI platforms configured, you can select which platform and model to use in the settings.
-
-= Is this plugin compatible with caching plugins? =
-
-Yes, TLDRWP is compatible with most caching plugins. The AJAX requests bypass cache to ensure fresh content.
-
-== Screenshots ==
-
-1. TL;DR button on a blog post
-2. Settings page configuration
-3. Generated summary with social sharing
-4. Loading state animation
-
-== Changelog ==
-
-= 0.1.0 =
-* Initial release
-* AI-powered TL;DR generation
-* Automatic button injection
-* Settings integration
-* Platform and model selection
-* Social sharing functionality
-
-== Upgrade Notice ==
-
-= 0.1.0 =
-Initial release of TLDRWP AI Block.
+[![WordPress](https://img.shields.io/badge/WordPress-Plugin-blue.svg)](https://wordpress.org/plugins/tldrwp/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black.svg)](https://github.com/mattcromwell/tldrwp)
+[![Website](https://img.shields.io/badge/Website-mattcromwell.com-green.svg)](https://mattcromwell.com)
