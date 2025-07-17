@@ -20,6 +20,12 @@ define( 'TLDRWP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'TLDRWP_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TLDRWP_PLUGIN_FILE', __FILE__ );
 
+// Load component classes
+require_once TLDRWP_PLUGIN_PATH . 'includes/settings.php';
+require_once TLDRWP_PLUGIN_PATH . 'includes/ai-service.php';
+require_once TLDRWP_PLUGIN_PATH . 'admin/admin.php';
+require_once TLDRWP_PLUGIN_PATH . 'public/public.php';
+
 // Load the main plugin class
 require_once TLDRWP_PLUGIN_PATH . 'includes/class-tldrwp.php';
 
