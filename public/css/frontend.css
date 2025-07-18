@@ -477,4 +477,57 @@
     .tldrwp-button:hover {
         transform: none;
     }
+}
+
+/* Record Button Styling */
+.tldrwp-button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tldrwp-record-button {
+    background: transparent;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    color: #64748b;
+}
+
+.tldrwp-record-button:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background-color: #f1f5f9;
+}
+
+.tldrwp-record-button:active {
+    transform: scale(0.95);
+}
+
+.tldrwp-record-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tldrwp-record-button.recording {
+    border-color: #ef4444;
+    color: #ef4444;
+    background-color: #fef2f2;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 } 

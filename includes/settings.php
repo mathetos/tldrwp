@@ -170,6 +170,7 @@ class TLDRWP_Settings {
             'reading',
             'tldrwp_settings_section'
         );
+
     }
 
     /**
@@ -460,7 +461,7 @@ class TLDRWP_Settings {
                 $sanitized['rate_limit_window'] = 86400;
             }
         }
-        
+
         return $sanitized;
     }
 } 

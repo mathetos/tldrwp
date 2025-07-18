@@ -42,6 +42,8 @@ class TLDRWP_Public {
         add_filter( 'the_content', array( $this, 'inject_tldr_button' ) );
         add_action( 'wp_ajax_tldrwp_generate_summary', array( $this, 'handle_ajax_request' ) );
         add_action( 'wp_ajax_nopriv_tldrwp_generate_summary', array( $this, 'handle_ajax_request' ) );
+        add_action( 'wp_ajax_tldrwp_transcribe_audio', array( $this, 'handle_transcribe_request' ) );
+        add_action( 'wp_ajax_nopriv_tldrwp_transcribe_audio', array( $this, 'handle_transcribe_request' ) );
         add_action( 'init', array( $this, 'register_block' ) );
         add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
     }
@@ -134,6 +136,16 @@ class TLDRWP_Public {
                             <span class="tldrwp-button-title">%s</span>
                             <span class="tldrwp-button-desc">%s</span>
                         </span>
+                    </button>
+                    <button class="tldrwp-record-button" title="Record audio summary">
+                        <svg class="tldrwp-record-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <path d="M12 19v3"></path>
+                        </svg>
+                        <svg class="tldrwp-stop-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        </svg>
                     </button>
                 </div>
                 <div class="tldrwp-content" style="display: none;"></div>
@@ -343,5 +355,131 @@ class TLDRWP_Public {
         ob_start();
         do_action( $hook_name, $response, $article_id, $article_title );
         return ob_get_clean();
+    }
+
+    /**
+     * Handle AJAX request for audio transcription.
+     */
+    public function handle_transcribe_request() {
+        // Verify nonce
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'tldrwp_ajax_nonce' ) ) {
+            wp_send_json_error( 'Invalid nonce' );
+            return;
+        }
+
+        // Check if AI Services plugin is available
+        if ( ! function_exists( 'ai_services' ) ) {
+            wp_send_json_error( 'AI Services plugin is required for transcription' );
+            return;
+        }
+
+        // Check if OpenAI is available through AI Services
+        if ( ! $this->is_openai_available() ) {
+            wp_send_json_error( 'OpenAI is not configured in AI Services plugin' );
+            return;
+        }
+
+        // Check if audio file was uploaded
+        if ( ! isset( $_FILES['audio'] ) || $_FILES['audio']['error'] !== UPLOAD_ERR_OK ) {
+            wp_send_json_error( 'No audio file uploaded' );
+            return;
+        }
+
+        $audio_file = $_FILES['audio'];
+        
+        // Validate file type
+        $allowed_types = array( 'audio/webm', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/ogg' );
+        if ( ! in_array( $audio_file['type'], $allowed_types ) ) {
+            wp_send_json_error( 'Invalid audio file type' );
+            return;
+        }
+
+        // Check file size (max 25MB - OpenAI's limit)
+        if ( $audio_file['size'] > 25 * 1024 * 1024 ) {
+            wp_send_json_error( 'Audio file too large (max 25MB)' );
+            return;
+        }
+
+        try {
+            // Get OpenAI API key from AI Services plugin
+            $openai_key = get_option( 'ais_openai_api_key' );
+            if ( empty( $openai_key ) ) {
+                wp_send_json_error( 'OpenAI API key not configured in AI Services plugin' );
+                return;
+            }
+
+            // Prepare the audio file for OpenAI API
+            $audio_data = file_get_contents( $audio_file['tmp_name'] );
+            $audio_name = 'recording.' . pathinfo( $audio_file['name'], PATHINFO_EXTENSION );
+
+            // Create multipart form data
+            $boundary = wp_generate_uuid4();
+            $body = '';
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"{$audio_name}\"\r\n";
+            $body .= "Content-Type: {$audio_file['type']}\r\n\r\n";
+            $body .= $audio_data . "\r\n";
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"model\"\r\n\r\n";
+            $body .= "whisper-1\r\n";
+            $body .= "--{$boundary}--\r\n";
+
+            // Send request to OpenAI Whisper API
+            $response = wp_remote_post( 'https://api.openai.com/v1/audio/transcriptions', array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $openai_key,
+                    'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+                ),
+                'body' => $body,
+                'timeout' => 30,
+            ) );
+
+            if ( is_wp_error( $response ) ) {
+                wp_send_json_error( 'API request failed: ' . $response->get_error_message() );
+                return;
+            }
+
+            $response_code = wp_remote_retrieve_response_code( $response );
+            $response_body = wp_remote_retrieve_body( $response );
+
+            if ( $response_code !== 200 ) {
+                $error_data = json_decode( $response_body, true );
+                $error_message = isset( $error_data['error']['message'] ) ? $error_data['error']['message'] : 'Unknown API error';
+                wp_send_json_error( 'OpenAI API error: ' . $error_message );
+                return;
+            }
+
+            $transcription_data = json_decode( $response_body, true );
+            
+            if ( ! isset( $transcription_data['text'] ) ) {
+                wp_send_json_error( 'Invalid transcription response' );
+                return;
+            }
+
+            wp_send_json_success( $transcription_data['text'] );
+
+        } catch ( Exception $e ) {
+            wp_send_json_error( 'Transcription failed: ' . $e->getMessage() );
+        }
+    }
+
+    /**
+     * Check if OpenAI is available through AI Services plugin.
+     */
+    private function is_openai_available() {
+        if ( ! function_exists( 'ai_services' ) ) {
+            return false;
+        }
+
+        $ai_services = ai_services();
+        $registered_slugs = $ai_services->get_registered_service_slugs();
+        
+        if ( ! in_array( 'openai', $registered_slugs ) ) {
+            return false;
+        }
+
+        // Check if OpenAI API key is configured
+        $api_key = get_option( 'ais_openai_api_key', '' );
+        return ! empty( $api_key );
     }
 } 

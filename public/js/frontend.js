@@ -4,12 +4,16 @@
     // TL;DR Frontend JavaScript
     class TLDRWP {
         constructor() {
+            this.mediaRecorder = null;
+            this.audioChunks = [];
+            this.isRecording = false;
             this.init();
         }
 
         init() {
             this.checkAlreadyClicked();
             this.bindEvents();
+            this.checkRecordingAvailability();
         }
 
         /**
@@ -41,6 +45,9 @@
                 if (e.target.classList.contains('tldrwp-button')) {
                     e.preventDefault();
                     this.handleTLDRRequest(e.target);
+                } else if (e.target.closest('.tldrwp-record-button')) {
+                    e.preventDefault();
+                    this.handleRecordToggle(e.target.closest('.tldrwp-record-button'));
                 }
             });
         }
@@ -471,6 +478,185 @@
             
             // Replace the button with the success div
             button.parentNode.replaceChild(successDiv, button);
+        }
+
+        async handleRecordToggle(recordButton) {
+            if (this.isRecording) {
+                await this.stopRecording(recordButton);
+            } else {
+                await this.startRecording(recordButton);
+            }
+        }
+
+        async startRecording(recordButton) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                this.mediaRecorder = new MediaRecorder(stream);
+                this.audioChunks = [];
+                
+                this.mediaRecorder.ondataavailable = (event) => {
+                    this.audioChunks.push(event.data);
+                };
+                
+                this.mediaRecorder.onstop = () => {
+                    this.processRecording(recordButton);
+                };
+                
+                this.mediaRecorder.start();
+                this.isRecording = true;
+                
+                // Update UI
+                const recordIcon = recordButton.querySelector('.tldrwp-record-icon');
+                const stopIcon = recordButton.querySelector('.tldrwp-stop-icon');
+                recordIcon.style.display = 'none';
+                stopIcon.style.display = 'block';
+                recordButton.classList.add('recording');
+                recordButton.title = 'Stop recording';
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Unable to access microphone. Please check permissions.');
+            }
+        }
+
+        async stopRecording(recordButton) {
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                this.mediaRecorder.stop();
+                this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                this.isRecording = false;
+                
+                // Update UI
+                const recordIcon = recordButton.querySelector('.tldrwp-record-icon');
+                const stopIcon = recordButton.querySelector('.tldrwp-stop-icon');
+                recordIcon.style.display = 'block';
+                stopIcon.style.display = 'none';
+                recordButton.classList.remove('recording');
+                recordButton.title = 'Record audio summary';
+                recordButton.disabled = true;
+                recordButton.innerHTML = '<span>Processing...</span>';
+            }
+        }
+
+        async processRecording(recordButton) {
+            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+            
+            try {
+                const transcription = await this.transcribeAudio(audioBlob);
+                
+                if (transcription) {
+                    // Use transcription as additional context for summary
+                    const container = recordButton.closest('.tldrwp-container');
+                    const button = container.querySelector('.tldrwp-button');
+                    
+                    // Add transcription to prompt
+                    const originalPrompt = button.dataset.prompt || this.getDefaultPrompt();
+                    const enhancedPrompt = `${originalPrompt}\n\nAdditional context from user: ${transcription}`;
+                    
+                    // Trigger summary with enhanced prompt
+                    await this.handleTLDRRequestWithPrompt(button, enhancedPrompt);
+                }
+            } catch (error) {
+                console.error('Error processing recording:', error);
+                let errorMessage = 'Error processing recording. Please try again.';
+                
+                if (error.message && error.message.includes('AI Services plugin is required')) {
+                    errorMessage = 'AI Services plugin is required for voice transcription. Please install and configure it.';
+                } else if (error.message && error.message.includes('OpenAI is not configured')) {
+                    errorMessage = 'OpenAI is not configured in AI Services plugin. Please configure your OpenAI API key.';
+                }
+                
+                alert(errorMessage);
+            } finally {
+                // Reset record button
+                recordButton.disabled = false;
+                recordButton.innerHTML = `
+                    <svg class="tldrwp-record-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <path d="M12 19v3"></path>
+                    </svg>
+                    <svg class="tldrwp-stop-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    </svg>
+                `;
+            }
+        }
+
+        async transcribeAudio(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            formData.append('action', 'tldrwp_transcribe_audio');
+            formData.append('nonce', tldrwp_ajax.nonce);
+            
+            const response = await fetch(tldrwp_ajax.ajax_url, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.success) {
+                const errorMessage = data.data || 'Transcription failed';
+                const error = new Error(errorMessage);
+                error.message = errorMessage;
+                throw error;
+            }
+            
+            return data.data;
+        }
+
+        async handleTLDRRequestWithPrompt(button, customPrompt) {
+            const container = button.closest('.tldrwp-container');
+            const content = container.querySelector('.tldrwp-content');
+            
+            // Set localStorage to mark this article as clicked
+            this.markArticleAsClicked();
+            
+            // Show loading state
+            this.showLoading(button, content);
+            
+            try {
+                // Get post content for AI processing
+                const postContent = this.getPostContent();
+                
+                // Make API request with custom prompt
+                const response = await this.makeAPIRequest(customPrompt, postContent);
+                
+                // Show success state with TL;DR content
+                this.showTLDRContent(button, content, response);
+                
+            } catch (error) {
+                console.error('TL;DR Error:', error);
+                this.showError(button, content, error.message);
+            }
+        }
+
+        /**
+         * Check if recording functionality is available
+         */
+        checkRecordingAvailability() {
+            // Check if MediaRecorder API is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+                this.hideRecordButton();
+                return;
+            }
+
+            // Check if microphone is available (optional, as we'll request permission when needed)
+            // For now, we'll show the button and let the user try to use it
+        }
+
+        /**
+         * Hide record button if recording is not available
+         */
+        hideRecordButton() {
+            const recordButtons = document.querySelectorAll('.tldrwp-record-button');
+            recordButtons.forEach(button => {
+                button.style.display = 'none';
+            });
         }
     }
 
