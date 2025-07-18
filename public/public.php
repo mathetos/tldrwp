@@ -81,7 +81,8 @@ class TLDRWP_Public {
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce' => wp_create_nonce( 'tldrwp_ajax_nonce' ),
             'enable_social_sharing' => $this->plugin->settings['enable_social_sharing'],
-            'success_message' => $this->plugin->settings['success_message']
+            'success_message' => $this->plugin->settings['success_message'],
+            'article_id' => get_the_ID()
         ) );
     }
 
@@ -159,11 +160,7 @@ class TLDRWP_Public {
             wp_send_json_error( __( 'Security check failed', 'tldrwp' ) );
         }
 
-        // Check rate limiting
-        $user_id = get_current_user_id();
-        if ( $this->plugin->is_rate_limit_exceeded( $user_id ) ) {
-            wp_send_json_error( __( 'Rate limit exceeded. Please wait before generating another TL;DR summary.', 'tldrwp' ) );
-        }
+
 
         // Check if AI Services is active
         if ( ! $this->plugin->ai_service->check_ai_services() ) {
