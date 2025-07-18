@@ -79,6 +79,34 @@ Yes, your post content is sent to the AI service you've configured to generate s
 
 Currently, summaries are generated automatically. Future versions may include manual editing capabilities.
 
+= How can I track TL;DR generations in analytics? =
+
+TLDRWP dispatches a custom JavaScript event `tldrwp_generated` when a summary is successfully generated. You can listen for this event to track generations in Google Analytics, Plausible, or any other analytics tool.
+
+**Google Analytics 4:**
+```javascript
+document.addEventListener('tldrwp_generated', function(e) {
+    gtag('event', 'tldr_generated', {
+        article_id: e.detail.articleId,
+        article_title: e.detail.articleTitle
+    });
+});
+```
+
+**Plausible Analytics:**
+```javascript
+document.addEventListener('tldrwp_generated', function(e) {
+    plausible('TL;DR Generated', {
+        props: {
+            article_id: e.detail.articleId,
+            article_title: e.detail.articleTitle
+        }
+    });
+});
+```
+
+The event includes: `articleId`, `articleTitle`, `timestamp`, and `platform` data.
+
 = Changelog =
 
 = 1.0.0 =

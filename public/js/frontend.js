@@ -175,6 +175,9 @@
             // Save the TL;DR content to localStorage
             this.saveTLDRContent(response);
             
+            // Dispatch custom event for analytics tracking
+            this.dispatchTLDREvent();
+            
             // Show TL;DR content with animation
             if (content) {
                 // Check if social sharing is enabled
@@ -321,6 +324,22 @@
 
             const tldrKey = `tldr_clicked_${articleId}`;
             localStorage.setItem(tldrKey, 'true');
+        }
+
+        /**
+         * Dispatch custom event for analytics tracking
+         */
+        dispatchTLDREvent() {
+            const articleId = tldrwp_ajax.article_id;
+            const tldrEvent = new CustomEvent('tldrwp_generated', {
+                detail: {
+                    articleId: articleId,
+                    articleTitle: document.title,
+                    timestamp: new Date().toISOString(),
+                    platform: 'tldrwp'
+                }
+            });
+            document.dispatchEvent(tldrEvent);
         }
 
         /**
