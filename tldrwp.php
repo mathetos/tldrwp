@@ -43,3 +43,61 @@ function tldrwp_init() {
     TLDRWP::get_instance();
 }
 add_action( 'plugins_loaded', 'tldrwp_init' );
+
+/**
+ * Action Hooks for TL;DR Customization
+ * 
+ * These hooks allow developers to customize the TL;DR output at different points:
+ * 
+ * @param string $response The AI-generated TL;DR response
+ * @param int $article_id The current article/post ID
+ * @param string $article_title The current article title
+ */
+function tldrwp_action_hooks() {
+    // Hook: Before the summary heading
+    do_action( 'tldr_before_summary_heading' );
+    
+    // Hook: After the summary heading
+    do_action( 'tldr_after_summary_heading' );
+    
+    // Hook: Before the summary content
+    do_action( 'tldr_before_summary_copy' );
+    
+    // Hook: After the summary content
+    do_action( 'tldr_after_summary_copy' );
+    
+    // Hook: Summary footer (after social sharing)
+    do_action( 'tldr_summary_footer' );
+}
+
+/**
+ * Filter Hooks for TL;DR Content Customization
+ * 
+ * These filters allow developers to modify the TL;DR content:
+ * 
+ * @param string $content The content to be filtered
+ * @param string $response The AI-generated TL;DR response
+ * @param int $article_id The current article/post ID
+ * @param string $article_title The current article title
+ */
+
+/**
+ * Filter the TL;DR response before display
+ */
+function tldrwp_filter_response( $response, $article_id = null, $article_title = null ) {
+    return apply_filters( 'tldrwp_response', $response, $article_id, $article_title );
+}
+
+/**
+ * Filter the TL;DR heading text
+ */
+function tldrwp_filter_heading( $heading = 'Key Insights' ) {
+    return apply_filters( 'tldrwp_heading', $heading );
+}
+
+/**
+ * Filter the TL;DR summary HTML structure
+ */
+function tldrwp_filter_summary_html( $html, $response, $social_sharing_html = '' ) {
+    return apply_filters( 'tldrwp_summary_html', $html, $response, $social_sharing_html );
+}

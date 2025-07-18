@@ -165,12 +165,16 @@
             }
         }
 
-        showTLDRContent(button, content, response) {
+        showTLDRContent(button, content, responseData) {
             // Remove loading state
             button.classList.remove('loading');
             
             // Convert button to success div - completely remove clickability
             this.convertButtonToSuccessDiv(button);
+            
+            // Extract response and action hooks
+            const response = responseData.response || responseData; // Handle both new and old format
+            const actionHooks = responseData.action_hooks || {};
             
             // Save the TL;DR content to localStorage
             this.saveTLDRContent(response);
@@ -207,22 +211,9 @@
                     </div>
                 ` : '';
                 
-                content.innerHTML = `
-                    <div class="tldrwp-summary">
-                        <h4 class="tldrwp-summary-title">
-                            <svg class="tldrwp-summary-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
-                                <path d="M20 3v4"></path>
-                                <path d="M22 5h-4"></path>
-                                <path d="M4 17v2"></path>
-                                <path d="M5 18H3"></path>
-                            </svg>
-                            Key Insights
-                        </h4>
-                        <div class="tldrwp-summary-content">${response}</div>
-                        ${socialSharingHTML}
-                    </div>
-                `;
+                // Build the TL;DR content with action hooks
+                const summaryHTML = this.buildSummaryWithHooks(response, socialSharingHTML, actionHooks);
+                content.innerHTML = summaryHTML;
                 
                 content.style.display = 'block';
                 content.classList.add('tldrwp-fade-in');
@@ -324,6 +315,40 @@
 
             const tldrKey = `tldr_clicked_${articleId}`;
             localStorage.setItem(tldrKey, 'true');
+        }
+
+        /**
+         * Build TL;DR summary HTML with action hooks
+         */
+        buildSummaryWithHooks(response, socialSharingHTML, actionHooks = {}) {
+            // Extract action hook outputs
+            const beforeSummaryHeading = actionHooks.tldr_before_summary_heading || '';
+            const afterSummaryHeading = actionHooks.tldr_after_summary_heading || '';
+            const beforeSummaryCopy = actionHooks.tldr_before_summary_copy || '';
+            const afterSummaryCopy = actionHooks.tldr_after_summary_copy || '';
+            const summaryFooter = actionHooks.tldr_summary_footer || '';
+
+            return `
+                <div class="tldrwp-summary">
+                    ${beforeSummaryHeading}
+                    <h4 class="tldrwp-summary-title">
+                        <svg class="tldrwp-summary-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
+                            <path d="M20 3v4"></path>
+                            <path d="M22 5h-4"></path>
+                            <path d="M4 17v2"></path>
+                            <path d="M5 18H3"></path>
+                        </svg>
+                        Key Insights
+                    </h4>
+                    ${afterSummaryHeading}
+                    ${beforeSummaryCopy}
+                    <div class="tldrwp-summary-content">${response}</div>
+                    ${afterSummaryCopy}
+                    ${socialSharingHTML}
+                    ${summaryFooter}
+                </div>
+            `;
         }
 
         /**

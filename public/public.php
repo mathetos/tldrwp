@@ -209,7 +209,28 @@ class TLDRWP_Public {
             }
         }
 
-        wp_send_json_success( $response );
+        // Get current post information for hooks
+        $article_id = get_the_ID();
+        $article_title = get_the_title();
+
+        // Apply filters to the response
+        $response = tldrwp_filter_response( $response, $article_id, $article_title );
+
+        // Build the complete response with action hooks
+        $response_data = array(
+            'response' => $response,
+            'article_id' => $article_id,
+            'article_title' => $article_title,
+            'action_hooks' => array(
+                'tldr_before_summary_heading' => $this->get_action_hook_output( 'tldr_before_summary_heading', $response, $article_id, $article_title ),
+                'tldr_after_summary_heading' => $this->get_action_hook_output( 'tldr_after_summary_heading', $response, $article_id, $article_title ),
+                'tldr_before_summary_copy' => $this->get_action_hook_output( 'tldr_before_summary_copy', $response, $article_id, $article_title ),
+                'tldr_after_summary_copy' => $this->get_action_hook_output( 'tldr_after_summary_copy', $response, $article_id, $article_title ),
+                'tldr_summary_footer' => $this->get_action_hook_output( 'tldr_summary_footer', $response, $article_id, $article_title )
+            )
+        );
+
+        wp_send_json_success( $response_data );
     }
 
     /**
@@ -307,5 +328,20 @@ class TLDRWP_Public {
         }
 
         return rest_ensure_response( array( 'response' => $response ) );
+    }
+
+    /**
+     * Get output from action hooks
+     *
+     * @param string $hook_name The hook name
+     * @param string $response The AI response
+     * @param int $article_id The article ID
+     * @param string $article_title The article title
+     * @return string The hook output
+     */
+    private function get_action_hook_output( $hook_name, $response, $article_id, $article_title ) {
+        ob_start();
+        do_action( $hook_name, $response, $article_id, $article_title );
+        return ob_get_clean();
     }
 } 

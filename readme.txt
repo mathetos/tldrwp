@@ -22,6 +22,7 @@ Automatically generate AI-powered TL;DR summaries for your WordPress posts using
 * **Multiple AI Platforms**: Works with any AI platform supported by the AI Services plugin
 * **Clean Integration**: Seamlessly integrates with your existing WordPress workflow
 * **Performance Optimized**: Lightweight and efficient with conditional loading
+* **Developer-Friendly**: Comprehensive action hooks and filters for customization
 
 = How It Works =
 
@@ -78,6 +79,22 @@ Yes, your post content is sent to the AI service you've configured to generate s
 = Can I edit generated summaries? =
 
 Currently, summaries are generated automatically. Future versions may include manual editing capabilities.
+
+= Can developers customize the TL;DR output? =
+
+Yes! TLDRWP provides comprehensive action hooks and filters for developers to customize the output. See the ACTION_HOOKS.md file in the plugin directory for complete documentation and examples.
+
+**Available Action Hooks:**
+* `tldr_before_summary_heading` - Add content before the heading
+* `tldr_after_summary_heading` - Add content after the heading  
+* `tldr_before_summary_copy` - Add content before the summary
+* `tldr_after_summary_copy` - Add content after the summary
+* `tldr_summary_footer` - Add content at the bottom
+
+**Available Filter Hooks:**
+* `tldrwp_response` - Modify the AI response
+* `tldrwp_heading` - Change the heading text
+* `tldrwp_summary_html` - Customize the entire HTML structure
 
 = How can I track TL;DR generations in analytics? =
 
