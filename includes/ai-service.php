@@ -39,7 +39,15 @@ class TLDRWP_AI_Service {
      * @return array
      */
     public function get_available_ai_platforms() {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Getting available AI platforms for user: ' . ( is_user_logged_in() ? 'logged-in' : 'non-logged-in' ) );
+            error_log( 'TLDRWP: Current user capabilities: ' . implode( ', ', array_keys( wp_get_current_user()->allcaps ) ) );
+        }
+        
         if ( ! function_exists( 'ai_services' ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: ai_services function not available in get_available_ai_platforms' );
+            }
             return array();
         }
 
@@ -49,11 +57,39 @@ class TLDRWP_AI_Service {
         // Get all registered service slugs
         $registered_slugs = $ai_services->get_registered_service_slugs();
         
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Registered service slugs: ' . implode( ', ', $registered_slugs ) );
+        }
+        
         foreach ( $registered_slugs as $slug ) {
-            if ( $ai_services->is_service_available( $slug ) ) {
+            // For TL;DR generation, bypass capability checks and check if service has API key
+            $is_available = false;
+            
+            if ( wp_doing_ajax() && isset( $_POST['action'] ) && 'tldrwp_generate_summary' === $_POST['action'] ) {
+                // For TL;DR generation, check if service has API key configured
+                $api_key_option = 'ais_' . $slug . '_api_key';
+                $api_key = get_option( $api_key_option, '' );
+                $is_available = ! empty( $api_key );
+            } else {
+                // For admin context, use normal availability check
+                $is_available = $ai_services->is_service_available( $slug );
+            }
+            
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Checking platform ' . $slug . ' - is_available: ' . ( $is_available ? 'true' : 'false' ) );
+            }
+            
+            if ( $is_available ) {
                 $name = $ai_services->get_service_name( $slug );
                 $available_platforms[ $slug ] = $name;
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( 'TLDRWP: Available platform: ' . $slug . ' -> ' . $name );
+                }
             }
+        }
+        
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Total available platforms: ' . count( $available_platforms ) );
         }
         
         return $available_platforms;
@@ -65,12 +101,39 @@ class TLDRWP_AI_Service {
      * @return string
      */
     public function get_selected_ai_platform() {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Getting selected AI platform' );
+            error_log( 'TLDRWP: Plugin settings keys: ' . implode( ', ', array_keys( $this->plugin->settings ) ) );
+            error_log( 'TLDRWP: Selected platform from settings: ' . ( isset( $this->plugin->settings['selected_ai_platform'] ) ? $this->plugin->settings['selected_ai_platform'] : 'NOT SET' ) );
+        }
+        
+        // For frontend users, try to use the selected platform directly if it's set
+        if ( ! is_admin() && ! empty( $this->plugin->settings['selected_ai_platform'] ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Frontend user - using selected platform directly: ' . $this->plugin->settings['selected_ai_platform'] );
+            }
+            return $this->plugin->settings['selected_ai_platform'];
+        }
+        
+        // For admin users, check availability
         $available_platforms = $this->get_available_ai_platforms();
+        
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Available platforms: ' . implode( ', ', array_keys( $available_platforms ) ) );
+        }
         
         // If no platform is selected or the selected platform is no longer available
         if ( empty( $this->plugin->settings['selected_ai_platform'] ) || ! isset( $available_platforms[ $this->plugin->settings['selected_ai_platform'] ] ) ) {
             // Return the first available platform, or empty string if none available
-            return ! empty( $available_platforms ) ? array_keys( $available_platforms )[0] : '';
+            $fallback_platform = ! empty( $available_platforms ) ? array_keys( $available_platforms )[0] : '';
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Using fallback platform: ' . $fallback_platform );
+            }
+            return $fallback_platform;
+        }
+        
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Returning selected platform: ' . $this->plugin->settings['selected_ai_platform'] );
         }
         
         return $this->plugin->settings['selected_ai_platform'];
@@ -98,14 +161,44 @@ class TLDRWP_AI_Service {
 
         $ai_services = ai_services();
         
-        // Check if the platform is available
-        if ( ! $ai_services->is_service_available( $platform_slug ) ) {
+        // For TL;DR generation, bypass capability checks and check if service has API key
+        $is_available = false;
+        
+        if ( wp_doing_ajax() && isset( $_POST['action'] ) && 'tldrwp_generate_summary' === $_POST['action'] ) {
+            // Check if API key exists for this platform
+            $api_key_option = 'ais_' . $platform_slug . '_api_key';
+            $api_key = get_option( $api_key_option, '' );
+            $is_available = ! empty( $api_key );
+            
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Bypassing capability check for TL;DR generation - Platform: ' . $platform_slug . ', API key exists: ' . ( $is_available ? 'yes' : 'no' ) );
+            }
+        } else {
+            // Use normal capability check for admin
+            $is_available = $ai_services->is_service_available( $platform_slug );
+        }
+        
+        if ( ! $is_available ) {
             return array();
         }
 
         try {
-            // Get the service instance
-            $service = $ai_services->get_available_service( $platform_slug );
+            // Get the service instance - bypass capability check for TL;DR generation
+            if ( wp_doing_ajax() && isset( $_POST['action'] ) && 'tldrwp_generate_summary' === $_POST['action'] ) {
+                // Use reflection to access the private service_registrations property
+                $reflection = new ReflectionClass( $ai_services );
+                $property = $reflection->getProperty( 'service_registrations' );
+                $property->setAccessible( true );
+                $service_registrations = $property->getValue( $ai_services );
+                
+                if ( isset( $service_registrations[ $platform_slug ] ) ) {
+                    $service = $service_registrations[ $platform_slug ]->create_instance();
+                } else {
+                    return array();
+                }
+            } else {
+                $service = $ai_services->get_available_service( $platform_slug );
+            }
             
             // Get all models for this service
             $all_models = $service->list_models();
@@ -185,10 +278,29 @@ class TLDRWP_AI_Service {
      * @return bool
      */
     public function check_ai_services() {
-        if ( ! function_exists( 'is_plugin_active' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        // Method 1: Check if the ai_services function exists (most reliable)
+        if ( function_exists( 'ai_services' ) ) {
+            return true;
         }
-        return is_plugin_active( 'ai-services/ai-services.php' );
+        
+        // Method 2: Check if the plugin file exists and is active
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            // Only try to load admin functions if we're in admin context
+            if ( is_admin() ) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            } else {
+                // For frontend, check if the plugin file exists and is in active plugins
+                $active_plugins = get_option( 'active_plugins', array() );
+                return in_array( 'ai-services/ai-services.php', $active_plugins );
+            }
+        }
+        
+        // Method 3: Use is_plugin_active if available
+        if ( function_exists( 'is_plugin_active' ) ) {
+            return is_plugin_active( 'ai-services/ai-services.php' );
+        }
+        
+        return false;
     }
 
     /**
@@ -232,28 +344,99 @@ class TLDRWP_AI_Service {
      * @return string|false The AI response or false on failure.
      */
     public function call_ai_service( $prompt ) {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Starting AI service call for user: ' . ( is_user_logged_in() ? 'logged-in' : 'non-logged-in' ) );
+        }
+        
         if ( ! function_exists( 'ai_services' ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: ai_services function not available' );
+            }
             return false;
         }
 
         $this->plugin->refresh_settings();
-        $selected_platform = $this->get_selected_ai_platform();
-        $selected_model = $this->get_selected_ai_model();
+        
+        // For frontend users, get platform and model directly from settings
+        if ( ! is_admin() ) {
+            $selected_platform = $this->plugin->settings['selected_ai_platform'];
+            $selected_model = $this->plugin->settings['selected_ai_model'];
+            
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Frontend user - using settings directly - Platform: ' . $selected_platform . ', Model: ' . $selected_model );
+            }
+        } else {
+            // For admin users, use the availability check
+            $selected_platform = $this->get_selected_ai_platform();
+            $selected_model = $this->get_selected_ai_model();
+            
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Admin user - using availability check - Platform: ' . $selected_platform . ', Model: ' . $selected_model );
+            }
+        }
+
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP: Final selected platform: ' . $selected_platform . ', Selected model: ' . $selected_model );
+        }
 
         if ( empty( $selected_platform ) || empty( $selected_model ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Platform or model is empty - Platform: ' . ( empty( $selected_platform ) ? 'EMPTY' : $selected_platform ) . ', Model: ' . ( empty( $selected_model ) ? 'EMPTY' : $selected_model ) );
+            }
             return false;
         }
 
         try {
             $ai_services = ai_services();
             
-            // Check if the platform is available
-            if ( ! $ai_services->is_service_available( $selected_platform ) ) {
-                return false;
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: AI Services instance created successfully' );
             }
+            
+            // For TL;DR generation, bypass capability checks
+            $service = null;
+            if ( wp_doing_ajax() && isset( $_POST['action'] ) && 'tldrwp_generate_summary' === $_POST['action'] ) {
+                // For TL;DR generation, create service directly without capability check
+                try {
+                    // Use reflection to access the private service_registrations property
+                    $reflection = new ReflectionClass( $ai_services );
+                    $property = $reflection->getProperty( 'service_registrations' );
+                    $property->setAccessible( true );
+                    $service_registrations = $property->getValue( $ai_services );
+                    
+                    if ( isset( $service_registrations[ $selected_platform ] ) ) {
+                        $service = $service_registrations[ $selected_platform ]->create_instance();
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( 'TLDRWP: Created service instance directly for TL;DR generation' );
+                        }
+                    } else {
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( 'TLDRWP: Service registration not found for platform: ' . $selected_platform );
+                        }
+                        return false;
+                    }
+                } catch ( Exception $e ) {
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Failed to create service instance directly: ' . $e->getMessage() );
+                    }
+                    return false;
+                }
+            } else {
+                // For admin context, use normal availability check
+                if ( ! $ai_services->is_service_available( $selected_platform ) ) {
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Platform ' . $selected_platform . ' is not available' );
+                    }
+                    return false;
+                }
+                
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( 'TLDRWP: Platform ' . $selected_platform . ' is available' );
+                }
 
-            // Get the service instance
-            $service = $ai_services->get_available_service( $selected_platform );
+                // Get the service instance
+                $service = $ai_services->get_available_service( $selected_platform );
+            }
             
             // Check if the model is available for this service
             $available_models = $service->list_models();
@@ -273,26 +456,57 @@ class TLDRWP_AI_Service {
                         'feature' => 'tldrwp-summary',
                     ) );
                     
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Model instance created successfully' );
+                    }
+                    
                     // Generate content using the model
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Calling model->generate_text with prompt length: ' . strlen( $prompt ) );
+                    }
+                    
                     $candidates = $model->generate_text( $prompt );
+                    
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Model response received, candidates type: ' . gettype( $candidates ) );
+                        if ( is_object( $candidates ) ) {
+                            error_log( 'TLDRWP: Candidates class: ' . get_class( $candidates ) );
+                        }
+                    }
                     
                     // Extract text from candidates using AI Services helpers
                     if ( class_exists( 'Felix_Arntz\AI_Services\Services\API\Helpers' ) ) {
                         $helpers = 'Felix_Arntz\AI_Services\Services\API\Helpers';
                         $candidate_contents = $helpers::get_candidate_contents( $candidates );
                         $text = $helpers::get_text_from_contents( $candidate_contents );
+                        
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( 'TLDRWP: Extracted text using helpers, length: ' . strlen( $text ) );
+                        }
+                        
                         return $text;
                     } else {
                         // Fallback: try to extract text manually
                         if ( is_object( $candidates ) && method_exists( $candidates, 'to_array' ) ) {
                             $candidates_array = $candidates->to_array();
                             if ( isset( $candidates_array[0]['content']['parts'][0]['text'] ) ) {
-                                return $candidates_array[0]['content']['parts'][0]['text'];
+                                $text = $candidates_array[0]['content']['parts'][0]['text'];
+                                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                                    error_log( 'TLDRWP: Extracted text manually, length: ' . strlen( $text ) );
+                                }
+                                return $text;
                             }
+                        }
+                        
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( 'TLDRWP: Failed to extract text from candidates' );
                         }
                         return false;
                     }
                 } catch ( Exception $e ) {
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Exception in AI service call (capability method): ' . $e->getMessage() );
+                    }
                     return false;
                 }
             } else {
@@ -324,11 +538,17 @@ class TLDRWP_AI_Service {
                         return false;
                     }
                 } catch ( Exception $e ) {
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( 'TLDRWP: Exception in AI service call (fallback method): ' . $e->getMessage() );
+                    }
                     return false;
                 }
             }
             
         } catch ( Exception $e ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'TLDRWP: Exception in AI service call (outer try-catch): ' . $e->getMessage() );
+            }
             return false;
         }
     }

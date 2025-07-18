@@ -158,6 +158,12 @@ class TLDRWP_Public {
             wp_send_json_error( __( 'Security check failed', 'tldrwp' ) );
         }
 
+        // Check rate limiting
+        $user_id = get_current_user_id();
+        if ( $this->plugin->is_rate_limit_exceeded( $user_id ) ) {
+            wp_send_json_error( __( 'Rate limit exceeded. Please wait before generating another TL;DR summary.', 'tldrwp' ) );
+        }
+
         // Check if AI Services is active
         if ( ! $this->plugin->ai_service->check_ai_services() ) {
             wp_send_json_error( __( 'AI Services plugin is not active. Please install and configure the AI Services plugin.', 'tldrwp' ) );
@@ -272,6 +278,12 @@ class TLDRWP_Public {
      * @return WP_REST_Response
      */
     public function handle_chat_request( WP_REST_Request $request ) {
+        // Check rate limiting
+        $user_id = get_current_user_id();
+        if ( $this->plugin->is_rate_limit_exceeded( $user_id ) ) {
+            return new WP_REST_Response( array( 'error' => __( 'Rate limit exceeded. Please wait before generating another TL;DR summary.', 'tldrwp' ) ), 429 );
+        }
+
         if ( ! $this->plugin->ai_service->check_ai_services() ) {
             return new WP_REST_Response( array( 'error' => __( 'AI Services plugin is not active.', 'tldrwp' ) ), 400 );
         }

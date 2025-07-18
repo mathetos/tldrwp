@@ -54,7 +54,9 @@ class TLDRWP_Settings {
             'button_description' => 'Click here to generate a TL;DR of this article',
             'enable_social_sharing' => true,
             'selected_ai_platform' => '',
-            'selected_ai_model' => ''
+            'selected_ai_model' => '',
+            'rate_limit_requests' => 10,
+            'rate_limit_window' => 3600 // 1 hour in seconds
         );
     }
 
@@ -148,6 +150,14 @@ class TLDRWP_Settings {
             'tldrwp_test_connection',
             __( 'Test Connection', 'tldrwp' ),
             array( $this, 'test_connection_callback' ),
+            'reading',
+            'tldrwp_settings_section'
+        );
+
+        add_settings_field(
+            'tldrwp_rate_limiting',
+            __( 'Rate Limiting', 'tldrwp' ),
+            array( $this, 'rate_limiting_callback' ),
             'reading',
             'tldrwp_settings_section'
         );
@@ -350,6 +360,24 @@ class TLDRWP_Settings {
     }
 
     /**
+     * Rate limiting callback.
+     */
+    public function rate_limiting_callback() {
+        $this->refresh_settings();
+        $rate_limit_requests = $this->plugin->settings['rate_limit_requests'];
+        $rate_limit_window = $this->plugin->settings['rate_limit_window'];
+        
+        echo '<p><label>' . esc_html__( 'Maximum requests per hour:', 'tldrwp' ) . '</label><br>';
+        echo '<input type="number" name="tldrwp_settings[rate_limit_requests]" value="' . esc_attr( $rate_limit_requests ) . '" min="1" max="100" style="width: 100px;">';
+        echo '</p>';
+        echo '<p><label>' . esc_html__( 'Time window (seconds):', 'tldrwp' ) . '</label><br>';
+        echo '<input type="number" name="tldrwp_settings[rate_limit_window]" value="' . esc_attr( $rate_limit_window ) . '" min="60" max="86400" style="width: 100px;">';
+        echo ' <span class="description">(' . esc_html( gmdate( 'H:i:s', $rate_limit_window ) ) . ')</span>';
+        echo '</p>';
+        echo '<p class="description">' . esc_html__( 'Rate limiting helps prevent abuse and control API costs. Set to 0 to disable rate limiting.', 'tldrwp' ) . '</p>';
+    }
+
+    /**
      * Sanitize settings.
      *
      * @param array $input Input settings.
@@ -391,6 +419,23 @@ class TLDRWP_Settings {
         // Selected AI model
         if ( isset( $input['selected_ai_model'] ) ) {
             $sanitized['selected_ai_model'] = sanitize_text_field( $input['selected_ai_model'] );
+        }
+        
+        // Rate limiting settings
+        if ( isset( $input['rate_limit_requests'] ) ) {
+            $sanitized['rate_limit_requests'] = absint( $input['rate_limit_requests'] );
+            if ( $sanitized['rate_limit_requests'] > 100 ) {
+                $sanitized['rate_limit_requests'] = 100;
+            }
+        }
+        
+        if ( isset( $input['rate_limit_window'] ) ) {
+            $sanitized['rate_limit_window'] = absint( $input['rate_limit_window'] );
+            if ( $sanitized['rate_limit_window'] < 60 ) {
+                $sanitized['rate_limit_window'] = 60;
+            } elseif ( $sanitized['rate_limit_window'] > 86400 ) {
+                $sanitized['rate_limit_window'] = 86400;
+            }
         }
         
         return $sanitized;

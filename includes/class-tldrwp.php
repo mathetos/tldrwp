@@ -90,17 +90,115 @@ class TLDRWP {
      * Initialize the plugin.
      */
     private function init() {
-        // Load settings
-        $this->load_settings();
+        // Load component classes
+        if ( is_admin() ) {
+            $this->admin = new TLDRWP_Admin( $this );
+        }
+        
+        $this->public = new TLDRWP_Public( $this );
+        $this->ai_service = new TLDRWP_AI_Service( $this );
+        $this->settings_manager = new TLDRWP_Settings( $this );
+        
+        // Initialize settings
+        $this->refresh_settings();
+        
+        // Modify AI Services capabilities for frontend users
+        add_action( 'ais_load_services_capabilities', array( $this, 'modify_ai_services_capabilities' ) );
+        
 
-        // Check dependencies
-        $this->check_dependencies();
+    }
 
-        // Initialize component classes
-        $this->init_components();
+    /**
+     * Modify AI Services capabilities to allow frontend TL;DR generation.
+     *
+     * @param object $controller The AI Services capability controller.
+     */
+    public function modify_ai_services_capabilities( $controller ) {
+        // Grant access to AI services for TL;DR generation with rate limiting
+        $controller->set_meta_map_callback(
+            'ais_access_service',
+            function ( $user_id, $service_slug ) {
+                // Only allow for TL;DR generation on public posts with rate limiting
+                if ( is_singular() || wp_doing_ajax() ) {
+                    return array( 'exist' );
+                }
+                return array( 'ais_access_services' );
+            }
+        );
+    }
 
-        // Initialize hooks
-        $this->init_hooks();
+
+
+    /**
+     * Check if user has exceeded rate limit for TL;DR generation.
+     *
+     * @param int $user_id User ID (0 for non-logged-in users).
+     * @return bool True if rate limit exceeded, false otherwise.
+     */
+    public function is_rate_limit_exceeded( $user_id = 0 ) {
+        // Check if rate limiting is disabled
+        if ( empty( $this->settings['rate_limit_requests'] ) ) {
+            return false;
+        }
+        
+        $rate_limit_key = 'tldrwp_rate_limit_' . ( $user_id ?: 'guest_' . $this->get_guest_user_ip() );
+        $rate_limit_data = get_transient( $rate_limit_key );
+        
+        $current_time = time();
+        $max_requests = absint( $this->settings['rate_limit_requests'] );
+        $time_window = absint( $this->settings['rate_limit_window'] );
+        
+        if ( false === $rate_limit_data ) {
+            // First request
+            set_transient( $rate_limit_key, array(
+                'count' => 1,
+                'first_request' => $current_time
+            ), $time_window );
+            return false;
+        }
+        
+        // Check if we're still within the time window
+        if ( $current_time - $rate_limit_data['first_request'] > $time_window ) {
+            // Reset for new time window
+            set_transient( $rate_limit_key, array(
+                'count' => 1,
+                'first_request' => $current_time
+            ), $time_window );
+            return false;
+        }
+        
+        // Check if limit exceeded
+        if ( $rate_limit_data['count'] >= $max_requests ) {
+            return true;
+        }
+        
+        // Increment count
+        $rate_limit_data['count']++;
+        set_transient( $rate_limit_key, $rate_limit_data, $time_window );
+        
+        return false;
+    }
+
+    /**
+     * Get IP address for guest users.
+     *
+     * @return string IP address.
+     */
+    private function get_guest_user_ip() {
+        $ip_keys = array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
+        
+        foreach ( $ip_keys as $key ) {
+            if ( array_key_exists( $key, $_SERVER ) === true ) {
+                foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
+                    $ip = trim( $ip );
+                    if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false ) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        
+        return '0.0.0.0';
     }
 
     /**
@@ -136,12 +234,15 @@ class TLDRWP {
      * Check plugin dependencies.
      */
     private function check_dependencies() {
-        if ( ! function_exists( 'is_plugin_active' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        
-        if ( ! is_plugin_active( 'ai-services/ai-services.php' ) ) {
-            add_action( 'admin_notices', array( $this, 'admin_notice_ai_services_required' ) );
+        // Only show admin notices in admin context
+        if ( is_admin() ) {
+            if ( ! function_exists( 'is_plugin_active' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+            
+            if ( ! is_plugin_active( 'ai-services/ai-services.php' ) ) {
+                add_action( 'admin_notices', array( $this, 'admin_notice_ai_services_required' ) );
+            }
         }
     }
 
