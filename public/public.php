@@ -80,7 +80,8 @@ class TLDRWP_Public {
         wp_localize_script( 'tldrwp-frontend', 'tldrwp_ajax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce' => wp_create_nonce( 'tldrwp_ajax_nonce' ),
-            'enable_social_sharing' => $this->plugin->settings['enable_social_sharing']
+            'enable_social_sharing' => $this->plugin->settings['enable_social_sharing'],
+            'success_message' => $this->plugin->settings['success_message']
         ) );
     }
 

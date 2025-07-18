@@ -52,6 +52,7 @@ class TLDRWP_Settings {
             'default_prompt'     => 'Please provide a concise TL;DR summary of this article with a call-to-action at the end.',
             'button_title'       => 'Short on time?',
             'button_description' => 'Click here to generate a TL;DR of this article',
+            'success_message'    => 'Enjoy reading!',
             'enable_social_sharing' => true,
             'selected_ai_platform' => '',
             'selected_ai_model' => '',
@@ -118,6 +119,14 @@ class TLDRWP_Settings {
             'tldrwp_button_text',
             __( 'Button Text', 'tldrwp' ),
             array( $this, 'button_text_callback' ),
+            'reading',
+            'tldrwp_settings_section'
+        );
+
+        add_settings_field(
+            'tldrwp_success_message',
+            __( 'Success Message', 'tldrwp' ),
+            array( $this, 'success_message_callback' ),
             'reading',
             'tldrwp_settings_section'
         );
@@ -208,6 +217,15 @@ class TLDRWP_Settings {
         echo '<p><label>' . esc_html__( 'Button Description:', 'tldrwp' ) . '</label><br>';
         echo '<input type="text" name="tldrwp_settings[button_description]" value="' . esc_attr( $this->plugin->settings['button_description'] ) . '" style="width: 100%;">';
         echo '</p>';
+    }
+
+    /**
+     * Success message callback.
+     */
+    public function success_message_callback() {
+        $this->refresh_settings();
+        echo '<input type="text" name="tldrwp_settings[success_message]" value="' . esc_attr( $this->plugin->settings['success_message'] ) . '" style="width: 100%;">';
+        echo '<p class="description">' . esc_html__( 'Message displayed on the button after TL;DR generation is complete.', 'tldrwp' ) . '</p>';
     }
 
     /**
@@ -406,6 +424,11 @@ class TLDRWP_Settings {
         // Button description
         if ( isset( $input['button_description'] ) ) {
             $sanitized['button_description'] = sanitize_text_field( $input['button_description'] );
+        }
+        
+        // Success message
+        if ( isset( $input['success_message'] ) ) {
+            $sanitized['success_message'] = sanitize_text_field( $input['success_message'] );
         }
         
         // Enable social sharing

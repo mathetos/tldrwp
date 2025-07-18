@@ -140,10 +140,9 @@
         showTLDRContent(button, content, response) {
             // Remove loading state
             button.classList.remove('loading');
-            button.disabled = false;
             
-            // Restore button to original state
-            this.restoreButton(button);
+            // Convert button to success div - completely remove clickability
+            this.convertButtonToSuccessDiv(button);
             
             // Show TL;DR content with animation
             if (content) {
@@ -280,6 +279,34 @@
                     block: 'nearest' 
                 });
             }
+        }
+
+        /**
+         * Convert the button to a success div - completely removes clickability
+         * @param {HTMLElement} button - The original button element
+         */
+        convertButtonToSuccessDiv(button) {
+            // Create new success div
+            const successDiv = document.createElement('div');
+            successDiv.className = 'tldrwp-success-div';
+            
+            // Get the success message
+            const successMessage = tldrwp_ajax.success_message || 'Enjoy reading!';
+            
+            // Create success content with icon and message
+            successDiv.innerHTML = `
+                <div class="tldrwp-success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                </div>
+                <div class="tldrwp-success-text">
+                    <span class="tldrwp-success-title">${successMessage}</span>
+                </div>
+            `;
+            
+            // Replace the button with the success div
+            button.parentNode.replaceChild(successDiv, button);
         }
     }
 
