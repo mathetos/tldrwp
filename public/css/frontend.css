@@ -478,3 +478,56 @@
         transform: none;
     }
 } 
+
+/* Copy TL;DR button - matching social share button colors */
+.tldrwp-copy-tldr-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  float: right;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 32px;
+  box-sizing: border-box;
+}
+.tldrwp-copy-tldr-btn:hover, .tldrwp-copy-tldr-btn:focus {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+.tldrwp-copy-tldr-btn .tldrwp-copy-tldr-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+}
+.tldrwp-copy-tldr-btn .tldrwp-copy-tldr-text {
+  font-size: 14px;
+  line-height: 1;
+  vertical-align: middle;
+}
+.tldrwp-copied {
+  border-color: #667eea;
+  color: #667eea;
+}
+.tldrwp-copied .tldrwp-copy-tldr-text {
+  color: #667eea;
+}
+/* Ensure social icons stay left-aligned */
+.tldrwp-social-buttons {
+  float: left;
+}
+.tldrwp-social-footer::after {
+  content: "";
+  display: table;
+  clear: both;
+} 

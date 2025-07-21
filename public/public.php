@@ -82,8 +82,36 @@ class TLDRWP_Public {
             'nonce' => wp_create_nonce( 'tldrwp_ajax_nonce' ),
             'enable_social_sharing' => $this->plugin->settings['enable_social_sharing'],
             'success_message' => $this->plugin->settings['success_message'],
-            'article_id' => get_the_ID()
+            'article_id' => get_the_ID(),
+            'post_title' => get_the_title(),
+            'post_url' => get_permalink()
         ) );
+
+        // Output social sharing data as hidden JSON
+        if ( $this->plugin->settings['enable_social_sharing'] ) {
+            $post_id = get_the_ID();
+            $post = get_post( $post_id );
+            
+            // Get excerpt from post meta or content
+            $excerpt = get_post_meta( $post_id, '_yoast_wpseo_metadesc', true );
+            if ( ! $excerpt ) {
+                $excerpt = get_the_excerpt( $post_id );
+            }
+            if ( ! $excerpt ) {
+                $content = wp_strip_all_tags( $post->post_content );
+                $excerpt = wp_trim_words( $content, 25, '...' );
+            }
+            
+            $share_data = array(
+                'title' => get_the_title( $post_id ),
+                'url' => get_permalink( $post_id ),
+                'excerpt' => $excerpt
+            );
+            
+            echo '<script type="application/json" id="tldrwp-share-data" style="display:none;">' . 
+                 wp_json_encode( $share_data ) . 
+                 '</script>';
+        }
     }
 
     /**
@@ -216,11 +244,18 @@ class TLDRWP_Public {
         // Apply filters to the response
         $response = tldrwp_filter_response( $response, $article_id, $article_title );
 
+        // Generate social sharing data if enabled
+        $social_sharing_data = null;
+        if ( $this->plugin->settings['enable_social_sharing'] ) {
+            $social_sharing_data = $this->plugin->social_sharing->prepare_share_data( get_post( $article_id ) );
+        }
+
         // Build the complete response with action hooks
         $response_data = array(
             'response' => $response,
             'article_id' => $article_id,
             'article_title' => $article_title,
+            'social_sharing_data' => $social_sharing_data,
             'action_hooks' => array(
                 'tldr_before_summary_heading' => $this->get_action_hook_output( 'tldr_before_summary_heading', $response, $article_id, $article_title ),
                 'tldr_after_summary_heading' => $this->get_action_hook_output( 'tldr_after_summary_heading', $response, $article_id, $article_title ),

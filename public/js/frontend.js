@@ -7,15 +7,15 @@
             this.init();
         }
 
-        init() {
-            this.checkAlreadyClicked();
+        async init() {
+            await this.checkAlreadyClicked();
             this.bindEvents();
         }
 
         /**
          * Check if TL;DR has already been generated for this article
          */
-        checkAlreadyClicked() {
+        async checkAlreadyClicked() {
             const articleId = tldrwp_ajax.article_id;
             if (!articleId) return;
 
@@ -32,7 +32,7 @@
                 }
                 
                 // Restore the TL;DR content
-                this.restoreTLDRContent(savedContent);
+                await this.restoreTLDRContent(savedContent);
             }
         }
 
@@ -176,6 +176,9 @@
             const response = responseData.response || responseData; // Handle both new and old format
             const actionHooks = responseData.action_hooks || {};
             
+            // Store share data for social sharing functions (keeping for potential future use)
+            this.shareData = responseData.social_sharing_data;
+            
             // Save the TL;DR content to localStorage
             this.saveTLDRContent(response);
             
@@ -190,29 +193,35 @@
                 // Build social sharing HTML conditionally
                 const socialSharingHTML = socialSharingEnabled ? `
                     <div class="tldrwp-social-sharing">
-                        <div class="tldrwp-social-sharing-text">Share these insights here:</div>
+                        <div class="tldrwp-social-sharing-text">Share this article:</div>
                         <div class="tldrwp-social-buttons">
-                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToTwitter('${this.escapeHtml(response)}')" title="Share on Twitter">
+                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToTwitter()" title="Share on X (Twitter)">
                                 <svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
                             </a>
-                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToFacebook('${this.escapeHtml(response)}')" title="Share on Facebook">
+                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToFacebook()" title="Share on Facebook">
                                 <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                             </a>
-                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToLinkedIn('${this.escapeHtml(response)}')" title="Share on LinkedIn">
+                            <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToLinkedIn()" title="Share on LinkedIn">
                                 <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                             </a>
-                            <button class="tldrwp-social-button" onclick="tldrwp.copyToClipboard('${this.escapeHtml(response)}')" title="Copy to clipboard">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                                </svg>
-                            </button>
                         </div>
                     </div>
                 ` : '';
                 
+                // Add the Copy TL;DR button HTML, floated right, with SVG icon
+                const copyButtonHTML = `
+                    <button class="tldrwp-copy-tldr-btn" id="tldrwp-copy-tldr-btn" aria-label="Copy TL;DR">
+                        <img src="/wp-content/plugins/tldrwp/public/img/clipboard-add-svgrepo-com.svg" alt="Copy" class="tldrwp-copy-tldr-icon"/>
+                        <span class="tldrwp-copy-tldr-text">Copy TL;DR</span>
+                    </button>
+                `;
+                // Insert copyButtonHTML inside the social sharing footer, floated right
+                const socialSharingFooter = document.createElement('div');
+                socialSharingFooter.className = 'tldrwp-social-footer';
+                socialSharingFooter.innerHTML = socialSharingHTML + copyButtonHTML;
+                
                 // Build the TL;DR content with action hooks
-                const summaryHTML = this.buildSummaryWithHooks(response, socialSharingHTML, actionHooks);
+                const summaryHTML = this.buildSummaryWithHooks(response, socialSharingFooter.outerHTML, actionHooks);
                 content.innerHTML = summaryHTML;
                 
                 content.style.display = 'block';
@@ -220,6 +229,29 @@
                 
                 // Scroll to content if it's not visible
                 this.scrollToElement(content);
+
+                // Add event listener for the copy button after rendering
+                setTimeout(() => {
+                    const copyBtn = document.getElementById('tldrwp-copy-tldr-btn');
+                    if (copyBtn) {
+                        copyBtn.addEventListener('click', () => {
+                            // Get plain text TL;DR (strip HTML tags)
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = response;
+                            const plainText = tempDiv.innerText;
+                            navigator.clipboard.writeText(plainText).then(() => {
+                                // Swap icon to check
+                                const icon = copyBtn.querySelector('.tldrwp-copy-tldr-icon');
+                                if (icon) {
+                                    icon.src = '/wp-content/plugins/tldrwp/public/img/clipboard-check-svgrepo-com.svg';
+                                    icon.alt = 'Copied';
+                                }
+                                // Optionally, visually indicate success (e.g., add a class)
+                                copyBtn.classList.add('tldrwp-copied');
+                            });
+                        });
+                    }
+                }, 0);
             }
         }
 
@@ -261,26 +293,122 @@
             return div.innerHTML;
         }
 
+        // Helper function to escape JavaScript strings for onclick attributes
+        escapeJsString(text) {
+            return text
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r')
+                .replace(/\t/g, '\\t');
+        }
+
+        // Get share data from hidden JSON
+        getShareData() {
+            const shareDataElement = document.getElementById('tldrwp-share-data');
+            if (!shareDataElement) {
+                console.warn('Share data element not found');
+                return null;
+            }
+            
+            try {
+                const shareData = JSON.parse(shareDataElement.textContent);
+                console.log('Share data loaded:', shareData);
+                return shareData;
+            } catch (error) {
+                console.error('Failed to parse share data:', error);
+                return null;
+            }
+        }
+
         // Social sharing methods
-        shareToTwitter(text) {
-            const url = encodeURIComponent(window.location.href);
-            const text_encoded = encodeURIComponent(text.substring(0, 200) + '...');
-            window.open(`https://twitter.com/intent/tweet?text=${text_encoded}&url=${url}`, '_blank');
+        shareToTwitter() {
+            console.log('Twitter share clicked');
+            
+            const shareData = this.getShareData();
+            if (!shareData) {
+                console.error('No share data available');
+                return;
+            }
+            
+            // Format: "Title" Excerpt URL
+            const shareText = shareData.excerpt ? 
+                `"${shareData.title}" ${shareData.excerpt}` : 
+                `"${shareData.title}"`;
+            
+            const truncatedText = this.truncateText(shareText, 200);
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(truncatedText)}&url=${encodeURIComponent(shareData.url)}`;
+            
+            console.log('Share URL:', shareUrl);
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
-        shareToFacebook(text) {
-            const url = encodeURIComponent(window.location.href);
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        shareToFacebook() {
+            console.log('Facebook share clicked');
+            
+            const shareData = this.getShareData();
+            if (!shareData) {
+                console.error('No share data available');
+                return;
+            }
+            
+            // Facebook doesn't support pre-populated text, only URL
+            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareData.url)}`;
+            
+            console.log('Share URL:', shareUrl);
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
-        shareToLinkedIn(text) {
-            const url = encodeURIComponent(window.location.href);
-            const text_encoded = encodeURIComponent(text.substring(0, 200) + '...');
-            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+        shareToLinkedIn() {
+            console.log('LinkedIn share clicked');
+            
+            const shareData = this.getShareData();
+            if (!shareData) {
+                console.error('No share data available');
+                return;
+            }
+            
+            // LinkedIn doesn't support pre-populated text, but we can set title and summary
+            const shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareData.url)}&title=${encodeURIComponent(shareData.title)}&summary=${encodeURIComponent(shareData.excerpt || '')}`;
+            
+            console.log('Share URL:', shareUrl);
+            window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
-        copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
+        // Helper method to truncate text at word boundaries
+        truncateText(text, maxLength) {
+            if (text.length <= maxLength) {
+                return text;
+            }
+            
+            const truncated = text.substring(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            
+            if (lastSpace !== -1) {
+                return truncated.substring(0, lastSpace) + '...';
+            }
+            
+            return truncated + '...';
+        }
+
+        copyToClipboard() {
+            console.log('Copy to clipboard clicked');
+            
+            const shareData = this.getShareData();
+            if (!shareData) {
+                console.error('No share data available');
+                return;
+            }
+            
+            // Format: "Title" Excerpt URL
+            const clipboardText = shareData.excerpt ? 
+                `"${shareData.title}" ${shareData.excerpt}\n\n${shareData.url}` : 
+                `"${shareData.title}"\n\n${shareData.url}`;
+            
+            console.log('Clipboard text:', clipboardText);
+            
+            navigator.clipboard.writeText(clipboardText).then(() => {
                 // Show a brief success message
                 const button = event.target.closest('.tldrwp-social-button');
                 const originalHTML = button.innerHTML;
@@ -381,7 +509,7 @@
         /**
          * Restore TL;DR content from localStorage
          */
-        restoreTLDRContent(content) {
+        async restoreTLDRContent(content) {
             const container = document.querySelector('.tldrwp-container');
             if (!container) return;
 
@@ -400,29 +528,35 @@
             // Check if social sharing is enabled
             const socialSharingEnabled = tldrwp_ajax.enable_social_sharing;
             
-            // Build social sharing HTML conditionally
+                        // Build social sharing HTML conditionally
             const socialSharingHTML = socialSharingEnabled ? `
                 <div class="tldrwp-social-sharing">
-                    <div class="tldrwp-social-sharing-text">Share these insights here:</div>
+                    <div class="tldrwp-social-sharing-text">Share this article:</div>
                     <div class="tldrwp-social-buttons">
-                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToTwitter('${this.escapeHtml(parsedContent)}')" title="Share on Twitter">
+                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToTwitter()" title="Share on X (Twitter)">
                             <svg viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
                         </a>
-                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToFacebook('${this.escapeHtml(parsedContent)}')" title="Share on Facebook">
+                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToFacebook()" title="Share on Facebook">
                             <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
-                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToLinkedIn('${this.escapeHtml(parsedContent)}')" title="Share on LinkedIn">
+                        <a href="#" class="tldrwp-social-button" onclick="tldrwp.shareToLinkedIn()" title="Share on LinkedIn">
                             <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                         </a>
-                        <button class="tldrwp-social-button" onclick="tldrwp.copyToClipboard('${this.escapeHtml(parsedContent)}')" title="Copy to clipboard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             ` : '';
+            
+            // Add the Copy TL;DR button HTML, floated right, with SVG icon
+            const copyButtonHTML = `
+                <button class="tldrwp-copy-tldr-btn" id="tldrwp-copy-tldr-btn" aria-label="Copy TL;DR">
+                    <img src="/wp-content/plugins/tldrwp/public/img/clipboard-add-svgrepo-com.svg" alt="Copy" class="tldrwp-copy-tldr-icon"/>
+                    <span class="tldrwp-copy-tldr-text">Copy TL;DR</span>
+                </button>
+            `;
+            // Insert copyButtonHTML inside the social sharing footer, floated right
+            const socialSharingFooter = document.createElement('div');
+            socialSharingFooter.className = 'tldrwp-social-footer';
+            socialSharingFooter.innerHTML = socialSharingHTML + copyButtonHTML;
             
             contentElement.innerHTML = `
                 <div class="tldrwp-summary">
@@ -437,12 +571,35 @@
                         Key Insights
                     </h4>
                     <div class="tldrwp-summary-content">${parsedContent}</div>
-                    ${socialSharingHTML}
+                    ${socialSharingFooter.outerHTML}
                 </div>
             `;
             
             contentElement.style.display = 'block';
             contentElement.classList.add('tldrwp-fade-in');
+
+            // Add event listener for the copy button after rendering
+            setTimeout(() => {
+                const copyBtn = document.getElementById('tldrwp-copy-tldr-btn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', () => {
+                        // Get plain text TL;DR (strip HTML tags)
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = parsedContent;
+                        const plainText = tempDiv.innerText;
+                        navigator.clipboard.writeText(plainText).then(() => {
+                            // Swap icon to check
+                            const icon = copyBtn.querySelector('.tldrwp-copy-tldr-icon');
+                            if (icon) {
+                                icon.src = '/wp-content/plugins/tldrwp/public/img/clipboard-check-svgrepo-com.svg';
+                                icon.alt = 'Copied';
+                            }
+                            // Optionally, visually indicate success (e.g., add a class)
+                            copyBtn.classList.add('tldrwp-copied');
+                        });
+                    });
+                }
+            }, 0);
         }
 
         /**
@@ -476,7 +633,7 @@
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             window.tldrwp = new TLDRWP();
         });
     } else {

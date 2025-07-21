@@ -68,6 +68,13 @@ class TLDRWP {
     public $public;
 
     /**
+     * Social Sharing component.
+     *
+     * @var TLDRWP_Social_Sharing
+     */
+    public $social_sharing;
+
+    /**
      * Get plugin instance.
      *
      * @return TLDRWP
@@ -98,6 +105,7 @@ class TLDRWP {
         $this->public = new TLDRWP_Public( $this );
         $this->ai_service = new TLDRWP_AI_Service( $this );
         $this->settings_manager = new TLDRWP_Settings( $this );
+        $this->social_sharing = new TLDRWP_Social_Sharing( $this );
         
         // Initialize settings
         $this->refresh_settings();

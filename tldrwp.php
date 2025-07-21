@@ -23,6 +23,7 @@ define( 'TLDRWP_PLUGIN_FILE', __FILE__ );
 // Load core components (always needed)
 require_once TLDRWP_PLUGIN_PATH . 'includes/settings.php';
 require_once TLDRWP_PLUGIN_PATH . 'includes/ai-service.php';
+require_once TLDRWP_PLUGIN_PATH . 'includes/social-sharing.php';
 
 // Load admin components conditionally
 if ( is_admin() ) {
