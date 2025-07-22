@@ -7,7 +7,7 @@
     "dev": "webpack --mode=development --watch"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^26.0.0",
+    "@wordpress/scripts": "^30.0.0",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.0"
   }
