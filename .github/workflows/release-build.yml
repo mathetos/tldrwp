@@ -1,0 +1,58 @@
+name: Build & Attach Plugin ZIP
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-attach:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run webpack build
+        run: npm run build
+
+      - name: Clean up development files
+        run: |
+          # Remove development dependencies and build tools
+          rm -rf node_modules
+          rm -rf .github
+          rm -f package-lock.json
+          rm -f webpack.config.js
+          rm -f BUILD.md
+          
+          # Remove source maps (optional - for smaller package)
+          find . -name "*.map" -delete
+          
+          # Remove any temporary files
+          find . -name ".DS_Store" -delete
+          find . -name "Thumbs.db" -delete
+
+      - name: Prepare ZIP
+        run: |
+          PLUGIN_SLUG="tldrwp"
+          ZIP_NAME="${{ github.event.release.tag_name }}.zip"
+          zip -r "$ZIP_NAME" "$PLUGIN_SLUG" -x "*.git*" "*.DS_Store*" "*.map"
+
+      - name: Upload ZIP to release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          name: "${{ github.event.release.tag_name }}.zip"
+          asset_path: "./${{ github.event.release.tag_name }}.zip"
+          asset_name: "${{ github.event.release.tag_name }}.zip"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
