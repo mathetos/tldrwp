@@ -125,7 +125,20 @@ class TLDRWP_Public {
         }
 
         $current_post_type = get_post_type();
-        return in_array( $current_post_type, $this->plugin->settings['enabled_post_types'] );
+        if ( ! in_array( $current_post_type, $this->plugin->settings['enabled_post_types'] ) ) {
+            return false;
+        }
+
+        // Check if TL;DR is disabled for this specific post
+        $post_id = get_the_ID();
+        $tldr_disabled = get_post_meta( $post_id, '_tldrwp_disabled', true );
+        
+        // Debug: Log the meta field value
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'TLDRWP Debug - Post ID: ' . $post_id . ', TLDR Disabled: ' . ( $tldr_disabled ? 'true' : 'false' ) );
+        }
+        
+        return ! $tldr_disabled;
     }
 
     /**
