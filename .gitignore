@@ -1,10 +1,10 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
-admin/js/tldrwp-editor.js
-admin/js/tldrwp-editor.js.map
-admin/js/tldrwp-editor.asset.php
+# Build artifacts (excluded from git but included in releases)
+# admin/js/tldrwp-editor.js
+# admin/js/tldrwp-editor.js.map
+# admin/js/tldrwp-editor.asset.php
 
 # OS generated files
 .DS_Store
