@@ -128,7 +128,7 @@ document.addEventListener('tldrwp_generated', function(e) {
 **Plausible Analytics:**
 ```javascript
 document.addEventListener('tldrwp_generated', function(e) {
-    plausible('TL;DR Generated', {
+    plausible('TLDR Generated', {
         props: {
             article_id: e.detail.articleId,
             article_title: e.detail.articleTitle

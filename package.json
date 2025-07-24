@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "description": "TL;DR WordPress Plugin",
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack --mode=development --watch"
+    "build": "wp-scripts build",
+    "dev": "wp-scripts start",
+    "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.0.0",
-    "webpack": "^5.88.0",
-    "webpack-cli": "^5.1.0"
+    "@wordpress/scripts": "^30.0.0"
   }
 } 
