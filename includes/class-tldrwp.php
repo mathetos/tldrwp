@@ -109,30 +109,6 @@ class TLDRWP {
         
         // Initialize settings
         $this->refresh_settings();
-        
-        // Modify AI Services capabilities for frontend users
-        add_action( 'ais_load_services_capabilities', array( $this, 'modify_ai_services_capabilities' ) );
-        
-
-    }
-
-    /**
-     * Modify AI Services capabilities to allow frontend TL;DR generation.
-     *
-     * @param object $controller The AI Services capability controller.
-     */
-    public function modify_ai_services_capabilities( $controller ) {
-        // Grant access to AI services for TL;DR generation with rate limiting
-        $controller->set_meta_map_callback(
-            'ais_access_service',
-            function ( $user_id, $service_slug ) {
-                // Only allow for TL;DR generation on public posts with rate limiting
-                if ( is_singular() || wp_doing_ajax() ) {
-                    return array( 'exist' );
-                }
-                return array( 'ais_access_services' );
-            }
-        );
     }
 
 
@@ -248,8 +224,8 @@ class TLDRWP {
                 require_once ABSPATH . 'wp-admin/includes/plugin.php';
             }
             
-            if ( ! is_plugin_active( 'ai-services/ai-services.php' ) ) {
-                add_action( 'admin_notices', array( $this, 'admin_notice_ai_services_required' ) );
+            if ( ! is_plugin_active( 'ai/ai.php' ) ) {
+                add_action( 'admin_notices', array( $this, 'admin_notice_ai_plugin_required' ) );
             }
         }
     }
@@ -303,16 +279,20 @@ class TLDRWP {
     }
 
     /**
-     * Admin notice for AI Services requirement.
+     * Admin notice for WordPress AI plugin requirement.
      */
-    public function admin_notice_ai_services_required() {
+    public function admin_notice_ai_plugin_required() {
         // Only show on the reading settings page
         global $pagenow;
         if ( ! is_admin() || 'options-reading.php' !== $pagenow ) {
             return;
         }
         
-        echo '<div class="notice notice-error"><p>' . esc_html__( 'TLDRWP requires the AI Services plugin to be installed and active.', 'tldrwp' ) . '</p></div>';
+        $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__( 'TLDRWP requires the AI Experiments plugin to be installed and active.', 'tldrwp' );
+        echo ' <a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Configure AI credentials', 'tldrwp' ) . '</a>';
+        echo '</p></div>';
     }
 
     // ============================================================================
@@ -358,12 +338,18 @@ class TLDRWP {
     }
 
     /**
-     * Check if AI Services plugin is active.
+     * Check if WordPress AI plugin is active and has credentials configured.
      *
      * @return bool
      */
-    public function check_ai_services() {
-        return isset( $this->ai_service ) ? $this->ai_service->check_ai_services() : false;
+    public function check_ai_plugin() {
+        // Check if WordPress AI plugin helper function exists
+        if ( ! function_exists( 'WordPress\AI\has_ai_credentials' ) ) {
+            return false;
+        }
+        
+        // Use the WordPress AI plugin helper function
+        return \WordPress\AI\has_ai_credentials();
     }
 
     /**

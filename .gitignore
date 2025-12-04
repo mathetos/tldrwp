@@ -27,3 +27,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.zip
+
+# Local development files
+MIGRATION_PLAN.md

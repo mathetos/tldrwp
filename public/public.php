@@ -203,9 +203,9 @@ class TLDRWP_Public {
 
 
 
-        // Check if AI Services is active
-        if ( ! $this->plugin->ai_service->check_ai_services() ) {
-            wp_send_json_error( __( 'AI Services plugin is not active. Please install and configure the AI Services plugin.', 'tldrwp' ) );
+        // Check if WordPress AI plugin is active and has credentials
+        if ( ! $this->plugin->check_ai_plugin() ) {
+            wp_send_json_error( __( 'AI Experiments plugin is not active or AI credentials are not configured. Please install and configure the AI Experiments plugin.', 'tldrwp' ) );
         }
 
         // Validate and sanitize input parameters
@@ -243,11 +243,7 @@ class TLDRWP_Public {
             // Check if selected platform is available
             $selected_platform = $this->plugin->ai_service->get_selected_ai_platform();
             
-            if ( empty( $selected_platform ) ) {
-                wp_send_json_error( __( 'No AI platform is selected or available. Please configure an AI provider in the AI Services plugin settings.', 'tldrwp' ) );
-            } else {
-                wp_send_json_error( __( 'AI service returned an empty response. Please check your API configuration and try again.', 'tldrwp' ) );
-            }
+            wp_send_json_error( __( 'AI service returned an empty response. Please check your AI credentials configuration in the AI Experiments plugin settings.', 'tldrwp' ) );
         }
 
         // Get current post information for hooks
@@ -285,7 +281,7 @@ class TLDRWP_Public {
      * Register the dynamic block and scripts.
      */
     public function register_block() {
-        if ( ! $this->plugin->ai_service->check_ai_services() ) {
+        if ( ! $this->plugin->check_ai_plugin() ) {
             return;
         }
 
@@ -351,8 +347,8 @@ class TLDRWP_Public {
             return new WP_REST_Response( array( 'error' => __( 'Rate limit exceeded. Please wait before generating another TL;DR summary.', 'tldrwp' ) ), 429 );
         }
 
-        if ( ! $this->plugin->ai_service->check_ai_services() ) {
-            return new WP_REST_Response( array( 'error' => __( 'AI Services plugin is not active.', 'tldrwp' ) ), 400 );
+        if ( ! $this->plugin->check_ai_plugin() ) {
+            return new WP_REST_Response( array( 'error' => __( 'AI Experiments plugin is not active or AI credentials are not configured.', 'tldrwp' ) ), 400 );
         }
 
         $prompt = sanitize_text_field( $request->get_param( 'prompt' ) );

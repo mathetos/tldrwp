@@ -63,16 +63,14 @@ class TLDRWP_Admin {
             return;
         }
         
-        // Check if AI Services plugin is active
-        if ( ! $this->plugin->ai_service->check_ai_services() ) {
-            echo '<div class="notice notice-error"><p>' . esc_html__( 'TLDRWP requires the AI Services plugin to be installed and active.', 'tldrwp' ) . '</p></div>';
+        // Check if WordPress AI plugin is active and has credentials
+        if ( ! $this->plugin->check_ai_plugin() ) {
+            $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+            echo '<div class="notice notice-error"><p>';
+            echo esc_html__( 'TLDRWP requires the AI Experiments plugin to be installed and active with AI credentials configured.', 'tldrwp' );
+            echo ' <a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Configure AI credentials', 'tldrwp' ) . '</a>';
+            echo '</p></div>';
             return;
-        }
-
-        // Check if AI platform is selected
-        $selected_platform = $this->plugin->ai_service->get_selected_ai_platform();
-        if ( empty( $selected_platform ) ) {
-            echo '<div class="notice notice-warning"><p>' . esc_html__( 'TLDRWP: No AI platform is selected. Please configure an AI provider in the AI Services plugin settings.', 'tldrwp' ) . '</p></div>';
         }
     }
 

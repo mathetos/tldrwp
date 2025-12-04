@@ -4,7 +4,7 @@
  * Description: Let your readers generate a TL;DR of your content with AI.
  * Version: 0.1.0
  * Author: Matt Cromwell
- * Requires Plugins: ai-services
+ * Requires Plugins: ai
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * License: GPLv2 or later
