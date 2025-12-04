@@ -17,8 +17,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: wp-content/plugins/tldrwp/package-lock.json
+      
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: wp-content/plugins/tldrwp/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('wp-content/plugins/tldrwp/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
         working-directory: wp-content/plugins/tldrwp
