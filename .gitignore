@@ -31,3 +31,7 @@ yarn-error.log*
 # Local development files
 MIGRATION_PLAN.md
 MIGRATION_COMPLETE.md
+RELEASE.md
+RELEASE_*.md
+BUILD.md
+test-*.php

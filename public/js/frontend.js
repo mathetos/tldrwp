@@ -69,7 +69,6 @@
                 this.showTLDRContent(button, content, response);
                 
             } catch (error) {
-                console.error('TL;DR Error:', error);
                 this.showError(button, content, error.message);
             }
         }
@@ -107,12 +106,6 @@
             formData.append('prompt', prompt);
             formData.append('content', content);
             formData.append('nonce', tldrwp_ajax.nonce);
-
-            // Debug logging
-            if (window.console && console.log) {
-                console.log('TLDRWP: Making API request with prompt length:', prompt.length);
-                console.log('TLDRWP: Content length:', content.length);
-            }
 
             const response = await fetch(tldrwp_ajax.ajax_url, {
                 method: 'POST',
@@ -308,27 +301,21 @@
         getShareData() {
             const shareDataElement = document.getElementById('tldrwp-share-data');
             if (!shareDataElement) {
-                console.warn('Share data element not found');
                 return null;
             }
             
             try {
                 const shareData = JSON.parse(shareDataElement.textContent);
-                console.log('Share data loaded:', shareData);
                 return shareData;
             } catch (error) {
-                console.error('Failed to parse share data:', error);
                 return null;
             }
         }
 
         // Social sharing methods
         shareToTwitter() {
-            console.log('Twitter share clicked');
-            
             const shareData = this.getShareData();
             if (!shareData) {
-                console.error('No share data available');
                 return;
             }
             
@@ -340,39 +327,30 @@
             const truncatedText = this.truncateText(shareText, 200);
             const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(truncatedText)}&url=${encodeURIComponent(shareData.url)}`;
             
-            console.log('Share URL:', shareUrl);
             window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
         shareToFacebook() {
-            console.log('Facebook share clicked');
-            
             const shareData = this.getShareData();
             if (!shareData) {
-                console.error('No share data available');
                 return;
             }
             
             // Facebook doesn't support pre-populated text, only URL
             const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareData.url)}`;
             
-            console.log('Share URL:', shareUrl);
             window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
         shareToLinkedIn() {
-            console.log('LinkedIn share clicked');
-            
             const shareData = this.getShareData();
             if (!shareData) {
-                console.error('No share data available');
                 return;
             }
             
             // LinkedIn doesn't support pre-populated text, but we can set title and summary
             const shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareData.url)}&title=${encodeURIComponent(shareData.title)}&summary=${encodeURIComponent(shareData.excerpt || '')}`;
             
-            console.log('Share URL:', shareUrl);
             window.open(shareUrl, '_blank', 'noopener,noreferrer');
         }
 
@@ -393,11 +371,8 @@
         }
 
         copyToClipboard() {
-            console.log('Copy to clipboard clicked');
-            
             const shareData = this.getShareData();
             if (!shareData) {
-                console.error('No share data available');
                 return;
             }
             
@@ -405,8 +380,6 @@
             const clipboardText = shareData.excerpt ? 
                 `"${shareData.title}" ${shareData.excerpt}\n\n${shareData.url}` : 
                 `"${shareData.title}"\n\n${shareData.url}`;
-            
-            console.log('Clipboard text:', clipboardText);
             
             navigator.clipboard.writeText(clipboardText).then(() => {
                 // Show a brief success message

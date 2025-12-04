@@ -45,12 +45,6 @@ class TLDRWP_Admin {
         // Block Editor integration - simplified
         add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
         add_action( 'init', array( $this, 'register_post_meta' ) );
-        
-        // Debug: Add save_post hook to track meta saves
-        add_action( 'save_post', array( $this, 'debug_save_post' ), 10, 2 );
-        
-        // Debug: Add REST API filter to see what's being returned
-        add_filter( 'rest_prepare_post', array( $this, 'debug_rest_response' ), 10, 3 );
     }
 
     /**
@@ -171,28 +165,6 @@ class TLDRWP_Admin {
                 return current_user_can( 'edit_posts' );
             },
         ] );
-    }
-    
-
-    /**
-     * Debug function to log post meta changes.
-     */
-    public function debug_save_post( $post_id, $post ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            $current_meta = get_post_meta( $post_id, '_tldrwp_disabled', true );
-            error_log( 'TLDRWP Debug - Post ID: ' . $post_id . ', Post Type: ' . $post->post_type . ', Meta Value: ' . ( $current_meta ? 'true' : 'false' ) );
-        }
-    }
-
-    /**
-     * Debug function to log REST API response.
-     */
-    public function debug_rest_response( $response, $post, $request ) {
-        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            $data = $response->get_data();
-            error_log( 'TLDRWP Debug - REST API Response for Post ID: ' . $post->ID . ', Post Type: ' . $post->post_type . ', Data: ' . print_r( $data, true ) );
-        }
-        return $response;
     }
 
 } 

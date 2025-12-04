@@ -186,7 +186,7 @@ Currently, summaries are generated automatically. Future versions may include ma
 
 == Changelog ==
 
-= 1.0.0 =
+= 0.1.0 =
 * Initial release
 * AI-powered summary generation
 * Integration with WordPress AI plugin
@@ -194,8 +194,10 @@ Currently, summaries are generated automatically. Future versions may include ma
 * Admin settings page
 * Test connection functionality
 * Clean, modular architecture
+* Automatic provider and model selection via WordPress AI Client
+* Styled settings wrapper for better UI
 
 == Upgrade Notice ==
 
-= 1.0.0 =
+= 0.1.0 =
 Initial release of TLDRWP - AI-powered post summaries for WordPress. 
