@@ -21,21 +21,18 @@ jobs:
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
-          path: wp-content/plugins/tldrwp/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('wp-content/plugins/tldrwp/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        working-directory: wp-content/plugins/tldrwp
         run: npm ci
 
       - name: Run webpack build
-        working-directory: wp-content/plugins/tldrwp
         run: npm run build
 
       - name: Verify build artifacts
-        working-directory: wp-content/plugins/tldrwp
         run: |
           # Check if the built files exist in the build directory
           if [ ! -f "build/index.js" ]; then
@@ -55,11 +52,9 @@ jobs:
           ls -la build/index.*
 
       - name: Run security audit
-        working-directory: wp-content/plugins/tldrwp
         run: npm audit --audit-level=moderate
 
       - name: Check for vulnerabilities
-        working-directory: wp-content/plugins/tldrwp
         run: |
           if npm audit --audit-level=high; then
             echo "✅ No high severity vulnerabilities found"
