@@ -2,9 +2,8 @@ name: Build Test
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'  # Triggers on version tags like v0.9.0
 
 jobs:
   build-test:
@@ -29,19 +28,45 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Show directory structure before build
+        run: |
+          echo "📁 Directory structure before build:"
+          ls -la
+          echo ""
+          echo "📁 Build directory (if exists):"
+          ls -la build/ 2>/dev/null || echo "Build directory does not exist yet"
+
       - name: Run webpack build
         run: npm run build
+        continue-on-error: false
+
+      - name: Show directory structure after build
+        run: |
+          echo "📁 Directory structure after build:"
+          ls -la
+          echo ""
+          echo "📁 Build directory contents:"
+          ls -la build/ 2>/dev/null || echo "Build directory does not exist"
+          echo ""
+          echo "📁 All files in build directory:"
+          find build -type f 2>/dev/null || echo "No build directory found"
 
       - name: Verify build artifacts
         run: |
           # Check if the built files exist in the build directory
           if [ ! -f "build/index.js" ]; then
             echo "❌ Built JavaScript file not found at build/index.js"
+            echo "Current directory: $(pwd)"
+            echo "Files in build directory:"
+            ls -la build/ 2>/dev/null || echo "Build directory does not exist"
             exit 1
           fi
           
           if [ ! -f "build/index.asset.php" ]; then
             echo "❌ Asset file not found at build/index.asset.php"
+            echo "Current directory: $(pwd)"
+            echo "Files in build directory:"
+            ls -la build/ 2>/dev/null || echo "Build directory does not exist"
             exit 1
           fi
           
