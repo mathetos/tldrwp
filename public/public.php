@@ -205,7 +205,7 @@ class TLDRWP_Public {
 
         // Check if WordPress AI plugin is active and has credentials
         if ( ! $this->plugin->check_ai_plugin() ) {
-            wp_send_json_error( __( 'AI Experiments plugin is not active or AI credentials are not configured. Please install and configure the AI Experiments plugin.', 'tldrwp' ) );
+            wp_send_json_error( __( 'WordPress AI plugin is not active or AI credentials are not configured. Please install and configure the WordPress AI plugin.', 'tldrwp' ) );
         }
 
         // Validate and sanitize input parameters
@@ -246,7 +246,7 @@ class TLDRWP_Public {
         $response = $this->plugin->ai_service->format_ai_response( $raw_response );
 
         if ( empty( $response ) ) {
-            wp_send_json_error( __( 'AI service returned an empty response. Please check your AI credentials configuration in the AI Experiments plugin settings.', 'tldrwp' ) );
+            wp_send_json_error( __( 'AI service returned an empty response. Please check your AI credentials configuration in the WordPress AI plugin settings.', 'tldrwp' ) );
         }
 
         // Get current post information for hooks
@@ -338,7 +338,7 @@ class TLDRWP_Public {
     }
 
     /**
-     * Handle the AI chat request via AI Services plugin.
+     * Handle the AI chat request via WordPress AI Client.
      *
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
@@ -351,7 +351,7 @@ class TLDRWP_Public {
         }
 
         if ( ! $this->plugin->check_ai_plugin() ) {
-            return new WP_REST_Response( array( 'error' => __( 'AI Experiments plugin is not active or AI credentials are not configured.', 'tldrwp' ) ), 400 );
+            return new WP_REST_Response( array( 'error' => __( 'WordPress AI plugin is not active or AI credentials are not configured. Please install and configure the WordPress AI plugin.', 'tldrwp' ) ), 400 );
         }
 
         $prompt = sanitize_text_field( $request->get_param( 'prompt' ) );
@@ -364,14 +364,23 @@ class TLDRWP_Public {
         // Combine prompt with content if provided
         $full_prompt = ! empty( $content ) ? $prompt . "\n\nContent to summarize:\n" . $content : $prompt;
 
-        /**
-         * Filter to generate content using AI Services.
-         * Developers using different AI services can hook into this filter.
-         */
-        $response = apply_filters( 'tldrwp_generate_ai_response', '', $full_prompt );
+        // Append HTML formatting instructions to the user's prompt
+        $html_instructions = "\n\nPlease format your response as HTML with proper <ul> and <li> tags for any bullet points or lists. Use <p> tags for paragraphs and <strong> for emphasis.";
+        $formatted_prompt = $full_prompt . $html_instructions;
+
+        // Call AI service directly using WordPress AI Client
+        $raw_response = $this->plugin->ai_service->call_ai_service( $formatted_prompt );
+
+        // Handle WP_Error
+        if ( is_wp_error( $raw_response ) ) {
+            return new WP_REST_Response( array( 'error' => $raw_response->get_error_message() ), 500 );
+        }
+
+        // Format the response using WordPress native functions
+        $response = $this->plugin->ai_service->format_ai_response( $raw_response );
 
         if ( empty( $response ) ) {
-            return new WP_REST_Response( array( 'error' => __( 'Unable to generate response. Please try again.', 'tldrwp' ) ), 500 );
+            return new WP_REST_Response( array( 'error' => __( 'AI service returned an empty response. Please check your AI credentials configuration in the WordPress AI plugin settings.', 'tldrwp' ) ), 500 );
         }
 
         return rest_ensure_response( array( 'response' => $response ) );
