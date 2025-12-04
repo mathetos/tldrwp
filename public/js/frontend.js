@@ -130,8 +130,8 @@
                 let errorMessage = data.data || 'Unknown error occurred';
                 
                 // Map common error messages to user-friendly versions
-                if (errorMessage.includes('AI Services plugin is not active')) {
-                    errorMessage = 'AI Services plugin is not active. Please contact your site administrator.';
+                if (errorMessage.includes('WordPress AI plugin is not active') || errorMessage.includes('AI plugin is not active')) {
+                    errorMessage = 'WordPress AI plugin is not active. Please contact your site administrator.';
                 } else if (errorMessage.includes('No AI service is configured')) {
                     errorMessage = 'No AI service is configured. Please contact your site administrator to set up an AI provider.';
                 } else if (errorMessage.includes('API configuration')) {

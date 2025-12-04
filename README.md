@@ -7,22 +7,22 @@
 [![PHP](https://img.shields.io/badge/PHP-7.4+-green.svg)](https://php.net/)
 [![License](https://img.shields.io/badge/License-GPL%20v2%2B-orange.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-> Automatically generate AI-powered TL;DR summaries for your WordPress posts using the AI Services plugin. Perfect for improving reader engagement and content accessibility.
+> Automatically generate AI-powered TL;DR summaries for your WordPress posts using the WordPress AI plugin. Perfect for improving reader engagement and content accessibility.
 
 ## 🚀 Features
 
-- **🤖 AI-Powered Summaries**: Leverages the AI Services plugin to generate intelligent, contextual summaries
+- **🤖 AI-Powered Summaries**: Leverages the WordPress AI plugin to generate intelligent, contextual summaries
 - **⚡ Automatic Generation**: Creates TL;DR summaries automatically when posts are published or updated
 - **🎨 Customizable Display**: Choose where and how summaries appear on your site
-- **🔌 Multiple AI Platforms**: Works with any AI platform supported by the AI Services plugin
+- **🔌 Multiple AI Platforms**: Works with any AI platform supported by the WordPress AI plugin (OpenAI, Anthropic, Google AI, etc.)
 - **🔧 Clean Integration**: Seamlessly integrates with your existing WordPress workflow
 - **⚡ Performance Optimized**: Lightweight and efficient with conditional loading
 
 ## 📋 Requirements
 
-- **WordPress**: 5.0 or higher
+- **WordPress**: 6.0 or higher
 - **PHP**: 7.4 or higher
-- **AI Services Plugin**: [Download here](https://wordpress.org/plugins/ai-services/)
+- **WordPress AI Plugin**: [Download here](https://github.com/WordPress/ai)
 
 ## 🛠️ Installation
 
@@ -30,8 +30,8 @@
 1. Go to **Plugins → Add New** in your WordPress admin
 2. Search for "TLDRWP"
 3. Click **Install Now** and then **Activate**
-4. Install and activate the [AI Services plugin](https://wordpress.org/plugins/ai-services/)
-5. Configure your AI platform in AI Services settings
+4. Install and activate the [WordPress AI plugin](https://github.com/WordPress/ai)
+5. Configure your AI credentials in **Settings → AI Credentials**
 6. Go to **Settings → Reading** to configure TLDRWP options
 7. Test the connection and start generating summaries!
 
@@ -43,28 +43,28 @@
 
 ## 🔧 Configuration
 
-### Setting Up AI Services
-1. Install and activate the [AI Services plugin](https://wordpress.org/plugins/ai-services/)
-2. Go to **AI Services → Settings**
-3. Choose your preferred AI platform (OpenAI, Anthropic, Google AI, etc.)
-4. Enter your API credentials
+### Setting Up WordPress AI Plugin
+1. Install and activate the [WordPress AI plugin](https://github.com/WordPress/ai)
+2. Go to **Settings → AI Credentials**
+3. Configure your AI provider credentials (OpenAI, Anthropic, Google AI, etc.)
+4. The WordPress AI plugin automatically selects the best available provider and model
 5. Save settings
 
 ### Configuring TLDRWP
 1. Navigate to **Settings → Reading**
 2. Scroll down to the **TL;DR Settings** section
-3. Choose where to display summaries:
-   - Before content
-   - After content
-   - Both locations
-4. Customize the summary title and styling
-5. Test your AI connection
-6. Save settings
+3. Configure your TL;DR preferences:
+   - Enable on specific post types
+   - Customize the default prompt
+   - Set button text and descriptions
+   - Configure rate limiting
+4. Test your AI connection
+5. Save settings
 
 ## 📖 How It Works
 
 ```
-User Publishes Post → TLDRWP Detects New Content → AI Services Plugin Processes Content → AI Platform Generates Summary → Summary Stored in Database → Summary Displayed on Frontend
+User Publishes Post → TLDRWP Detects New Content → WordPress AI Client Processes Content → AI Platform Generates Summary → Summary Displayed on Frontend
 ```
 
 ## 🎯 Use Cases
@@ -85,23 +85,25 @@ User Publishes Post → TLDRWP Detects New Content → AI Services Plugin Proces
 ### Frontend Display
 ![Frontend Summary](screenshots/frontend-display.png)
 
-### AI Services Integration
-![AI Services Config](screenshots/ai-services.png)
+### WordPress AI Plugin Integration
+![WordPress AI Config](screenshots/wordpress-ai.png)
 
 ## ❓ Frequently Asked Questions
 
 ### What is a TL;DR summary?
 TL;DR stands for "Too Long; Didn't Read." It's a brief summary that captures the main points of a longer piece of content, helping readers quickly understand what the content is about.
 
-### Do I need the AI Services plugin?
-Yes, TLDRWP requires the AI Services plugin to function. This plugin provides the AI integration capabilities that TLDRWP uses to generate summaries.
+### Do I need the WordPress AI plugin?
+Yes, TLDRWP requires the WordPress AI plugin to function. This plugin provides the AI integration capabilities that TLDRWP uses to generate summaries.
 
 ### Which AI platforms are supported?
-TLDRWP works with any AI platform supported by the AI Services plugin, including:
+TLDRWP works with any AI platform supported by the WordPress AI plugin, including:
 - OpenAI (GPT-3.5, GPT-4)
 - Anthropic (Claude)
 - Google AI (Gemini)
 - And many others
+
+The WordPress AI plugin automatically selects the best available provider and model for optimal performance.
 
 ### Can I customize how summaries appear?
 Yes! You can choose where summaries are displayed and customize their appearance through the plugin settings.
@@ -195,7 +197,7 @@ composer install
 #### Added
 - Initial release
 - AI-powered summary generation
-- Integration with AI Services plugin
+- Integration with WordPress AI plugin
 - Customizable display options
 - Admin settings page
 - Test connection functionality
@@ -213,7 +215,7 @@ This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) 
 
 ## 🙏 Acknowledgments
 
-- [AI Services Plugin](https://wordpress.org/plugins/ai-services/) for AI integration capabilities
+- [WordPress AI Plugin](https://github.com/WordPress/ai) for AI integration capabilities
 - WordPress community for best practices and standards
 - All contributors and beta testers
 
