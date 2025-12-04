@@ -193,7 +193,7 @@ composer install
 
 ## 📝 Changelog
 
-### [1.0.0] - 2024-01-XX
+### [0.1.0] - 2024-01-XX
 #### Added
 - Initial release
 - AI-powered summary generation
@@ -202,12 +202,15 @@ composer install
 - Admin settings page
 - Test connection functionality
 - Clean, modular architecture
+- Automatic provider and model selection via WordPress AI Client
+- Styled settings wrapper for better UI
 
 #### Technical
 - Class-based architecture with component separation
 - Conditional loading for performance optimization
 - Proper WordPress coding standards compliance
 - Comprehensive error handling and debugging
+- WordPress AI Client API integration
 
 ## 📄 License
 

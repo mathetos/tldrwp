@@ -4,7 +4,7 @@ Tags: ai, artificial intelligence, content, summary, tldr, reading, automation, 
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,7 +127,7 @@ The event includes: `articleId`, `articleTitle`, `timestamp`, and `platform` dat
 
 = Changelog =
 
-= 1.0.0 =
+= 0.1.0 =
 * Initial release
 * AI-powered summary generation
 * Integration with WordPress AI plugin
@@ -135,10 +135,12 @@ The event includes: `articleId`, `articleTitle`, `timestamp`, and `platform` dat
 * Admin settings page
 * Test connection functionality
 * Clean, modular architecture
+* Automatic provider and model selection via WordPress AI Client
+* Styled settings wrapper for better UI
 
 = Upgrade Notice =
 
-= 1.0.0 =
+= 0.1.0 =
 Initial release of TLDRWP - AI-powered post summaries for WordPress.
 
 == Installation ==

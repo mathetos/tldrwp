@@ -58,7 +58,7 @@ class TLDRWP_AI_Service {
         }
 
         if ( ! $this->check_ai_plugin() ) {
-            wp_send_json_error( __( 'AI Experiments plugin is not active or AI credentials are not configured.', 'tldrwp' ) );
+            wp_send_json_error( __( 'WordPress AI plugin is not active or AI credentials are not configured.', 'tldrwp' ) );
         }
 
         // Test with a simple prompt
@@ -97,7 +97,7 @@ class TLDRWP_AI_Service {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                 error_log( 'TLDRWP: AI credentials not configured' );
             }
-            return new \WP_Error( 'no_credentials', __( 'AI credentials are not configured. Please configure them in the AI Experiments plugin settings.', 'tldrwp' ) );
+            return new \WP_Error( 'no_credentials', __( 'AI credentials are not configured. Please configure them in the WordPress AI plugin settings.', 'tldrwp' ) );
         }
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
