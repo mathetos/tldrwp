@@ -302,39 +302,43 @@ class TLDRWP {
 
     /**
      * Get available AI platforms.
-     *
-     * @return array
+     * 
+     * @deprecated Platform selection is no longer needed. WordPress AI Client handles provider selection automatically.
+     * @return array Empty array - platform selection removed.
      */
     public function get_available_ai_platforms() {
-        return isset( $this->ai_service ) ? $this->ai_service->get_available_ai_platforms() : array();
+        return array();
     }
 
     /**
      * Get the selected AI platform.
-     *
-     * @return string
+     * 
+     * @deprecated Platform selection is no longer needed. WordPress AI Client handles provider selection automatically.
+     * @return string Empty string - platform selection removed.
      */
     public function get_selected_ai_platform() {
-        return isset( $this->ai_service ) ? $this->ai_service->get_selected_ai_platform() : '';
+        return '';
     }
 
     /**
      * Get available AI models.
-     *
-     * @param string $platform_slug Platform slug.
-     * @return array
+     * 
+     * @deprecated Model selection is no longer needed. WordPress AI Client handles model selection automatically.
+     * @param string $platform_slug Platform slug (ignored).
+     * @return array Empty array - model selection removed.
      */
     public function get_available_ai_models( $platform_slug = null ) {
-        return isset( $this->ai_service ) ? $this->ai_service->get_available_ai_models( $platform_slug ) : array();
+        return array();
     }
 
     /**
      * Get the selected AI model.
-     *
-     * @return string
+     * 
+     * @deprecated Model selection is no longer needed. WordPress AI Client handles model selection automatically.
+     * @return string Empty string - model selection removed.
      */
     public function get_selected_ai_model() {
-        return isset( $this->ai_service ) ? $this->ai_service->get_selected_ai_model() : '';
+        return '';
     }
 
     /**
@@ -365,10 +369,22 @@ class TLDRWP {
      * Call AI service.
      *
      * @param string $prompt The prompt to send to the AI service.
-     * @return string|false The AI response or false on failure.
+     * @return string|\WP_Error The AI response, WP_Error on failure, or false if service unavailable.
      */
     public function call_ai_service( $prompt ) {
-        return isset( $this->ai_service ) ? $this->ai_service->call_ai_service( $prompt ) : false;
+        if ( ! isset( $this->ai_service ) ) {
+            return false;
+        }
+        
+        $result = $this->ai_service->call_ai_service( $prompt );
+        
+        // Handle WP_Error - return as-is
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+        
+        // Return string result or false
+        return $result ? $result : false;
     }
 
     /**

@@ -236,13 +236,16 @@ class TLDRWP_Public {
             error_log( 'TLDRWP Raw Response: ' . print_r( $raw_response, true ) );
         }
         
+        // Handle WP_Error
+        if ( is_wp_error( $raw_response ) ) {
+            wp_send_json_error( $raw_response->get_error_message() );
+            return;
+        }
+        
         // Format the response using WordPress native functions
         $response = $this->plugin->ai_service->format_ai_response( $raw_response );
 
         if ( empty( $response ) ) {
-            // Check if selected platform is available
-            $selected_platform = $this->plugin->ai_service->get_selected_ai_platform();
-            
             wp_send_json_error( __( 'AI service returned an empty response. Please check your AI credentials configuration in the AI Experiments plugin settings.', 'tldrwp' ) );
         }
 
