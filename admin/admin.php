@@ -41,7 +41,6 @@ class TLDRWP_Admin {
         add_action( 'admin_notices', array( $this, 'admin_notice_ai_configuration' ) );
         add_action( 'wp_ajax_tldrwp_test_ai', array( $this, 'test_ai_connection' ) );
         add_action( 'wp_ajax_nopriv_tldrwp_test_ai', array( $this, 'test_ai_connection' ) );
-        add_action( 'wp_ajax_tldrwp_get_models', array( $this, 'ajax_get_models' ) );
         
         // Block Editor integration - simplified
         add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
@@ -65,9 +64,19 @@ class TLDRWP_Admin {
         
         // Check if WordPress AI plugin is active and has credentials
         if ( ! $this->plugin->check_ai_plugin() ) {
+            // Try to find the AI plugin settings page URL
             $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+            
+            // Check if the AI plugin has a different settings page
+            if ( function_exists( 'WordPress\AI\get_settings_page_url' ) ) {
+                $settings_url = \WordPress\AI\get_settings_page_url();
+            } elseif ( class_exists( '\WordPress\AI\Admin\Settings' ) ) {
+                // Try to get the page slug from the AI plugin
+                $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+            }
+            
             echo '<div class="notice notice-error"><p>';
-            echo esc_html__( 'TLDRWP requires the AI Experiments plugin to be installed and active with AI credentials configured.', 'tldrwp' );
+            echo esc_html__( 'TLDRWP requires the WordPress AI plugin to be installed and active with AI credentials configured.', 'tldrwp' );
             echo ' <a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Configure AI credentials', 'tldrwp' ) . '</a>';
             echo '</p></div>';
             return;
@@ -91,29 +100,6 @@ class TLDRWP_Admin {
         $this->plugin->ai_service->test_ai_connection();
     }
 
-    /**
-     * AJAX handler for getting models.
-     */
-    public function ajax_get_models() {
-        // Verify nonce
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
-            wp_send_json_error( __( 'Security check failed', 'tldrwp' ) );
-        }
-
-        if ( ! isset( $_POST['platform'] ) ) {
-            wp_send_json_error( __( 'Platform parameter is required.', 'tldrwp' ) );
-        }
-
-        $platform = sanitize_text_field( wp_unslash( $_POST['platform'] ) );
-        $models = $this->plugin->ai_service->get_available_ai_models( $platform );
-        
-        $model_names = array();
-        foreach ( $models as $model_slug => $model_data ) {
-            $model_names[ $model_slug ] = isset( $model_data['name'] ) ? $model_data['name'] : $model_slug;
-        }
-        
-        wp_send_json_success( $model_names );
-    }
 
 
 

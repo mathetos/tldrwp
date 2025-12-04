@@ -54,8 +54,6 @@ class TLDRWP_Settings {
             'button_description' => 'Click here to generate a TL;DR of this article',
             'success_message'    => 'Enjoy reading!',
             'enable_social_sharing' => true,
-            'selected_ai_platform' => '',
-            'selected_ai_model' => '',
             'rate_limit_requests' => 10,
             'rate_limit_window' => 3600 // 1 hour in seconds
         );
@@ -84,12 +82,16 @@ class TLDRWP_Settings {
      * Initialize settings page.
      */
     public function init_settings() {
-        // Add settings section to Reading page
+        // Add settings section to Reading page with styled wrapper
         add_settings_section(
             'tldrwp_settings_section',
             __( 'TL;DR Settings', 'tldrwp' ),
             array( $this, 'settings_section_callback' ),
-            'reading'
+            'reading',
+            array(
+                'before_section' => '<div class="tldrwp-settings-wrapper" style="background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 20px; margin: 20px 0; max-width: 850px;">',
+                'after_section'  => '</div>',
+            )
         );
 
         // Register settings
@@ -140,17 +142,9 @@ class TLDRWP_Settings {
         );
 
         add_settings_field(
-            'tldrwp_ai_platform',
-            __( 'AI Platform', 'tldrwp' ),
-            array( $this, 'ai_platform_callback' ),
-            'reading',
-            'tldrwp_settings_section'
-        );
-
-        add_settings_field(
-            'tldrwp_ai_model',
-            __( 'AI Model', 'tldrwp' ),
-            array( $this, 'ai_model_callback' ),
+            'tldrwp_ai_configuration',
+            __( 'AI Configuration', 'tldrwp' ),
+            array( $this, 'ai_configuration_callback' ),
             'reading',
             'tldrwp_settings_section'
         );
@@ -241,75 +235,42 @@ class TLDRWP_Settings {
     }
 
     /**
-     * AI platform callback.
+     * AI configuration callback.
      */
-    public function ai_platform_callback() {
-        $this->refresh_settings();
-        $available_platforms = $this->plugin->get_available_ai_platforms();
+    public function ai_configuration_callback() {
+        // Check if WordPress AI plugin is active and has credentials
+        $has_credentials = function_exists( 'WordPress\AI\has_ai_credentials' ) && \WordPress\AI\has_ai_credentials();
         
-        if ( empty( $available_platforms ) ) {
-            echo '<p class="description">' . esc_html__( 'No AI platforms available. Please configure API keys in the AI Services plugin settings.', 'tldrwp' ) . '</p>';
-            return;
+        if ( ! $has_credentials ) {
+            $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+            echo '<div class="notice notice-warning inline" style="margin: 0 0 10px 0;">';
+            echo '<p>' . esc_html__( 'AI credentials are not configured. Please configure your AI credentials in the WordPress AI plugin settings.', 'tldrwp' ) . '</p>';
+            echo '<p><a href="' . esc_url( $settings_url ) . '" class="button button-primary">' . esc_html__( 'Configure AI Credentials', 'tldrwp' ) . '</a></p>';
+            echo '</div>';
+        } else {
+            $settings_url = admin_url( 'options-general.php?page=ai-experiments' );
+            echo '<p class="description">';
+            echo esc_html__( 'AI credentials are configured. The WordPress AI plugin will automatically select the best available provider and model for TL;DR generation.', 'tldrwp' );
+            echo ' <a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Manage AI settings', 'tldrwp' ) . '</a>';
+            echo '</p>';
         }
-        
-        echo '<select name="tldrwp_settings[selected_ai_platform]" id="tldrwp_ai_platform">';
-        echo '<option value="">' . esc_html__( 'Select AI Platform', 'tldrwp' ) . '</option>';
-        
-        foreach ( $available_platforms as $slug => $name ) {
-            $selected = ( $this->plugin->settings['selected_ai_platform'] === $slug ) ? 'selected' : '';
-            echo '<option value="' . esc_attr( $slug ) . '" ' . $selected . '>' . esc_html( $name ) . '</option>';
-        }
-        
-        echo '</select>';
-        echo '<p class="description">' . esc_html__( 'Select which AI platform to use for TL;DR generation.', 'tldrwp' ) . '</p>';
-    }
-
-    /**
-     * AI model callback.
-     */
-    public function ai_model_callback() {
-        $this->refresh_settings();
-        $selected_platform = $this->plugin->get_selected_ai_platform();
-        
-        if ( empty( $selected_platform ) ) {
-            echo '<p class="description">' . esc_html__( 'Please select an AI platform first.', 'tldrwp' ) . '</p>';
-            return;
-        }
-        
-        $available_models = $this->plugin->get_available_ai_models( $selected_platform );
-        
-        if ( empty( $available_models ) ) {
-            echo '<p class="description">' . esc_html__( 'No models available for the selected platform.', 'tldrwp' ) . '</p>';
-            return;
-        }
-        
-        echo '<select name="tldrwp_settings[selected_ai_model]" id="tldrwp_ai_model">';
-        echo '<option value="">' . esc_html__( 'Select AI Model', 'tldrwp' ) . '</option>';
-        
-        foreach ( $available_models as $model_slug => $model_data ) {
-            $selected = ( $this->plugin->settings['selected_ai_model'] === $model_slug ) ? 'selected' : '';
-            $model_name = isset( $model_data['name'] ) ? $model_data['name'] : $model_slug;
-            echo '<option value="' . esc_attr( $model_slug ) . '" ' . $selected . '>' . esc_html( $model_name ) . '</option>';
-        }
-        
-        echo '</select>';
-        echo '<p class="description">' . esc_html__( 'Select which AI model to use for TL;DR generation.', 'tldrwp' ) . '</p>';
     }
 
     /**
      * Test connection callback.
      */
     public function test_connection_callback() {
-        $selected_platform = $this->plugin->get_selected_ai_platform();
+        // Check if WordPress AI plugin is active and has credentials
+        $has_credentials = function_exists( 'WordPress\AI\has_ai_credentials' ) && \WordPress\AI\has_ai_credentials();
         
-        if ( empty( $selected_platform ) ) {
-            echo '<p class="description">' . esc_html__( 'Please select an AI platform first.', 'tldrwp' ) . '</p>';
+        if ( ! $has_credentials ) {
+            echo '<p class="description">' . esc_html__( 'Please configure AI credentials first.', 'tldrwp' ) . '</p>';
             return;
         }
         
         echo '<button type="button" id="tldrwp_test_connection" class="button button-secondary">' . esc_html__( 'Test Connection', 'tldrwp' ) . '</button>';
         echo '<span id="tldrwp_test_result" style="margin-left: 10px;"></span>';
-        echo '<p class="description">' . esc_html__( 'Test the connection to your selected AI platform.', 'tldrwp' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Test the connection to your AI service.', 'tldrwp' ) . '</p>';
         
         // Add JavaScript for AJAX test
         ?>
@@ -343,34 +304,6 @@ class TLDRWP_Settings {
                         button.prop('disabled', false).text('<?php echo esc_js( __( 'Test Connection', 'tldrwp' ) ); ?>');
                     }
                 });
-            });
-            
-            // Update models when platform changes
-            $('#tldrwp_ai_platform').on('change', function() {
-                var platform = $(this).val();
-                var modelSelect = $('#tldrwp_ai_model');
-                
-                if (platform) {
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'POST',
-                        data: {
-                            action: 'tldrwp_get_models',
-                            platform: platform,
-                            nonce: '<?php echo wp_create_nonce( 'tldrwp_ajax_nonce' ); ?>'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                modelSelect.html('<option value=""><?php echo esc_js( __( 'Select AI Model', 'tldrwp' ) ); ?></option>');
-                                $.each(response.data, function(slug, name) {
-                                    modelSelect.append('<option value="' + slug + '">' + name + '</option>');
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    modelSelect.html('<option value=""><?php echo esc_js( __( 'Please select an AI platform first.', 'tldrwp' ) ); ?></option>');
-                }
             });
         });
         </script>
@@ -433,16 +366,6 @@ class TLDRWP_Settings {
         
         // Enable social sharing
         $sanitized['enable_social_sharing'] = isset( $input['enable_social_sharing'] ) ? true : false;
-        
-        // Selected AI platform
-        if ( isset( $input['selected_ai_platform'] ) ) {
-            $sanitized['selected_ai_platform'] = sanitize_text_field( $input['selected_ai_platform'] );
-        }
-        
-        // Selected AI model
-        if ( isset( $input['selected_ai_model'] ) ) {
-            $sanitized['selected_ai_model'] = sanitize_text_field( $input['selected_ai_model'] );
-        }
         
         // Rate limiting settings
         if ( isset( $input['rate_limit_requests'] ) ) {

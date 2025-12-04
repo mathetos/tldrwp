@@ -249,9 +249,7 @@ class TLDRWP {
             'default_prompt'     => 'Please provide a concise TL;DR summary of this article with a call-to-action at the end.',
             'button_title'       => 'Short on time?',
             'button_description' => 'Click here to generate a TL;DR of this article',
-            'enable_social_sharing' => true,
-            'selected_ai_platform' => '',
-            'selected_ai_model' => ''
+            'enable_social_sharing' => true
         );
     }
 
@@ -295,51 +293,6 @@ class TLDRWP {
         echo '</p></div>';
     }
 
-    // ============================================================================
-    // DELEGATION METHODS
-    // These methods delegate to the appropriate component classes
-    // ============================================================================
-
-    /**
-     * Get available AI platforms.
-     * 
-     * @deprecated Platform selection is no longer needed. WordPress AI Client handles provider selection automatically.
-     * @return array Empty array - platform selection removed.
-     */
-    public function get_available_ai_platforms() {
-        return array();
-    }
-
-    /**
-     * Get the selected AI platform.
-     * 
-     * @deprecated Platform selection is no longer needed. WordPress AI Client handles provider selection automatically.
-     * @return string Empty string - platform selection removed.
-     */
-    public function get_selected_ai_platform() {
-        return '';
-    }
-
-    /**
-     * Get available AI models.
-     * 
-     * @deprecated Model selection is no longer needed. WordPress AI Client handles model selection automatically.
-     * @param string $platform_slug Platform slug (ignored).
-     * @return array Empty array - model selection removed.
-     */
-    public function get_available_ai_models( $platform_slug = null ) {
-        return array();
-    }
-
-    /**
-     * Get the selected AI model.
-     * 
-     * @deprecated Model selection is no longer needed. WordPress AI Client handles model selection automatically.
-     * @return string Empty string - model selection removed.
-     */
-    public function get_selected_ai_model() {
-        return '';
-    }
 
     /**
      * Check if WordPress AI plugin is active and has credentials configured.
