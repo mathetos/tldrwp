@@ -1,0 +1,64 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v0.9.0
+
+jobs:
+  build:
+    name: Build release zip
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build plugin assets
+        run: npm run build
+      
+      - name: Generate zip
+        uses: 10up/action-wordpress-plugin-build-zip@stable
+        with:
+          retention-days: 30
+      
+      - name: Verify ZIP was created
+        run: |
+          echo "📦 Checking for ZIP file..."
+          ls -la *.zip || echo "No ZIP files found in root"
+          if [ -f "tldrwp.zip" ]; then
+            echo "✅ ZIP file found: tldrwp.zip"
+            ls -lh tldrwp.zip
+          else
+            echo "❌ ZIP file not found!"
+            exit 1
+          fi
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: tldrwp.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
