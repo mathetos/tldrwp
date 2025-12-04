@@ -18,23 +18,27 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: wp-content/plugins/tldrwp/package-lock.json
 
       - name: Install dependencies
+        working-directory: wp-content/plugins/tldrwp
         run: npm ci
 
       - name: Run webpack build
+        working-directory: wp-content/plugins/tldrwp
         run: npm run build
 
       - name: Verify build artifacts
+        working-directory: wp-content/plugins/tldrwp
         run: |
-          # Check if the built files exist
-          if [ ! -f "admin/js/tldrwp-editor.js" ]; then
-            echo "❌ Built JavaScript file not found"
+          # Check if the built files exist in the build directory
+          if [ ! -f "build/index.js" ]; then
+            echo "❌ Built JavaScript file not found at build/index.js"
             exit 1
           fi
           
-          if [ ! -f "admin/js/tldrwp-editor.asset.php" ]; then
-            echo "❌ Asset file not found"
+          if [ ! -f "build/index.asset.php" ]; then
+            echo "❌ Asset file not found at build/index.asset.php"
             exit 1
           fi
           
@@ -42,12 +46,14 @@ jobs:
           
           # Show file sizes
           echo "📦 Build artifacts:"
-          ls -la admin/js/tldrwp-editor.*
+          ls -la build/index.*
 
       - name: Run security audit
+        working-directory: wp-content/plugins/tldrwp
         run: npm audit --audit-level=moderate
 
       - name: Check for vulnerabilities
+        working-directory: wp-content/plugins/tldrwp
         run: |
           if npm audit --audit-level=high; then
             echo "✅ No high severity vulnerabilities found"
