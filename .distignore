@@ -1,0 +1,44 @@
+# Development dependencies
+/node_modules
+/package.json
+/package-lock.json
+
+# Source files (not needed in distribution)
+/src
+
+# Development scripts
+/deploy.ps1
+
+# Documentation (readme.txt is for WordPress.org)
+/README.md
+
+# Git files
+/.git
+/.github
+/.gitignore
+/.distignore
+
+# IDE files
+/.vscode
+/.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local development files
+MIGRATION_PLAN.md
+MIGRATION_COMPLETE.md
+RELEASE.md
+RELEASE_*.md
+BUILD.md
+test-*.php
+PLUGIN_CHECK_FIXES.md
+
