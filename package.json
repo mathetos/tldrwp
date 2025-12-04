@@ -5,7 +5,9 @@
   "scripts": {
     "build": "wp-scripts build",
     "dev": "wp-scripts start",
-    "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1"
+    "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "zip": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "package": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "devDependencies": {
     "@wordpress/scripts": "^31.1.0"

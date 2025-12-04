@@ -1,5 +1,6 @@
 # TLDRWP Deployment Script
 # This script builds the plugin and creates a deployment ZIP file
+# Includes only distribution files (matches GitHub Actions workflow)
 
 Write-Host "Starting TLDRWP deployment..." -ForegroundColor Green
 
@@ -32,11 +33,14 @@ if (Test-Path $deployDir) {
 }
 New-Item -ItemType Directory -Path $deployDir | Out-Null
 
-# Step 4: Copy files to deployment directory
-Write-Host "Copying plugin files..." -ForegroundColor Yellow
+# Step 4: Copy files to deployment directory (matching .distignore)
+Write-Host "Copying plugin files (excluding development files)..." -ForegroundColor Yellow
+
+# Files and directories to include in distribution (matches what 10up action includes)
 $filesToCopy = @(
     "admin",
-    "blocks", 
+    "blocks",
+    "build",      # Built assets from wp-scripts
     "includes",
     "public",
     "LICENSE",
@@ -45,18 +49,27 @@ $filesToCopy = @(
     "uninstall.php"
 )
 
-foreach ($file in $filesToCopy) {
-    if (Test-Path $file) {
-        if (Test-Path $file -PathType Container) {
-            Copy-Item $file -Destination $deployDir -Recurse
-        } else {
-            Copy-Item $file -Destination $deployDir
+$copiedCount = 0
+foreach ($item in $filesToCopy) {
+    if (Test-Path $item) {
+        try {
+            if (Test-Path $item -PathType Container) {
+                Copy-Item $item -Destination $deployDir -Recurse -Force
+                Write-Host "  [OK] Copied directory: $item" -ForegroundColor Green
+            } else {
+                Copy-Item $item -Destination $deployDir -Force
+                Write-Host "  [OK] Copied file: $item" -ForegroundColor Green
+            }
+            $copiedCount++
+        } catch {
+            Write-Host "  [ERROR] Error copying $item : $_" -ForegroundColor Red
         }
-        Write-Host "  Copied: $file" -ForegroundColor Green
     } else {
-        Write-Host "  Missing: $file" -ForegroundColor Yellow
+        Write-Host "  [WARN] Missing: $item" -ForegroundColor Yellow
     }
 }
+
+Write-Host "  Total items copied: $copiedCount" -ForegroundColor Green
 
 # Step 5: Create ZIP file
 Write-Host "Creating ZIP file: $zipName" -ForegroundColor Yellow
@@ -70,7 +83,11 @@ Remove-Item $deployDir -Recurse -Force
 # Step 7: Show results
 $zipSize = (Get-Item $zipName).Length
 $zipSizeKB = [math]::Round($zipSize / 1KB, 2)
+$zipSizeMB = [math]::Round($zipSize / 1MB, 2)
 
+Write-Host ""
 Write-Host "Deployment completed successfully!" -ForegroundColor Green
-Write-Host "ZIP file: $zipName ($zipSizeKB KB)" -ForegroundColor Cyan
-Write-Host "Location: $(Get-Location)\$zipName" -ForegroundColor Cyan 
+Write-Host "ZIP file: $zipName" -ForegroundColor Cyan
+Write-Host "Size: $zipSizeKB KB ($zipSizeMB MB)" -ForegroundColor Cyan
+Write-Host "Location: $((Get-Location).Path)\$zipName" -ForegroundColor Cyan
+Write-Host "" 
