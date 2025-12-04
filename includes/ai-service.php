@@ -80,7 +80,9 @@ class TLDRWP_AI_Service {
             }
             
             if ( $is_available ) {
-                $name = $ai_services->get_service_name( $slug );
+                // Get service name from metadata
+                $metadata = $ai_services->get_service_metadata( $slug );
+                $name = $metadata ? $metadata->get_name() : ucwords( str_replace( '-', ' ', $slug ) );
                 $available_platforms[ $slug ] = $name;
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                     error_log( 'TLDRWP: Available platform: ' . $slug . ' -> ' . $name );
