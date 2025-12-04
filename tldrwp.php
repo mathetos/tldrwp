@@ -3,9 +3,9 @@
  * Plugin Name: TLDRWP
  * Plugin URI: https://github.com/mathetos/tldrwp
  * Description: Let your readers generate a TL;DR of your content with AI.
- * Version: 0.1.0
+ * Version: 0.9.0
  * Author: Matt Cromwell
- * Author URI: https://mattcromwell.com
+ * Author URI: https://www.mattcromwell.com
  * Requires Plugins: ai
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants
-define( 'TLDRWP_VERSION', '0.1.0' );
+define( 'TLDRWP_VERSION', '0.9.0' );
 define( 'TLDRWP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'TLDRWP_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TLDRWP_PLUGIN_FILE', __FILE__ );

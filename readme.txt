@@ -1,18 +1,18 @@
 === TLDRWP ===
-Contributors: mattcromwell
-Tags: ai, content, summary, tldr, reading
+Contributors: webdevmattcrom
+Tags: ai, content, summary, tldr, key points
 Requires at least: 6.0
-Tested up to: 6.9
-Requires PHP: 7.4
-Stable tag: 0.1.0
+Tested up to: 6.9.x
+Requires PHP: 8.1
+Stable tag: 0.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Generate AI-powered TL;DR summaries for WordPress posts using the WordPress AI plugin.
+Generate AI-powered TL;DR or "Key Points" summaries for WordPress posts using the WordPress AI plugin.
 
 == Description ==
 
-**TLDRWP** automatically generates concise, AI-powered summaries for your WordPress posts, helping readers quickly understand your content and improving engagement rates.
+**TLDRWP** generates concise, AI-powered summaries for your WordPress content, helping readers quickly understand your content and improving engagement rates.
 
 = Key Features =
 
@@ -27,10 +27,10 @@ Generate AI-powered TL;DR summaries for WordPress posts using the WordPress AI p
 
 = How It Works =
 
-1. **Install & Activate**: Install TLDRWP and the WordPress AI plugin
+1. **Install & Activate**: Install TLDRWP and the [WordPress AI plugin](https://wordpress.org/plugins/ai/)
 2. **Configure AI**: Set up your AI credentials in WordPress AI plugin settings
 3. **Generate Summaries**: TL;DR summaries are automatically created for new and updated posts
-4. **Display**: Summaries appear in your chosen location with customizable styling
+4. **Display**: Summaries appear in your chosen post types with customizable styling
 
 = Perfect For =
 
@@ -42,8 +42,8 @@ Generate AI-powered TL;DR summaries for WordPress posts using the WordPress AI p
 
 = Requirements =
 
-* WordPress 6.0 or higher
-* PHP 7.4 or higher
+* WordPress 6.8 or higher
+* PHP 8.1 or higher
 * WordPress AI plugin - [Download here](https://github.com/WordPress/ai)
 
 = Installation =
