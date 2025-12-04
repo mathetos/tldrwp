@@ -8,6 +8,6 @@
     "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^30.0.0"
+    "@wordpress/scripts": "^31.1.0"
   }
-} 
+}
