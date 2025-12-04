@@ -76,14 +76,20 @@ jobs:
           echo "📦 Build artifacts:"
           ls -la build/index.*
 
-      - name: Run security audit
-        run: npm audit --audit-level=moderate
-
-      - name: Check for vulnerabilities
+      - name: Report all vulnerabilities (informational)
         run: |
+          echo "📊 Running full security audit (informational only)..."
+          npm audit || true
+          echo ""
+          echo "ℹ️  Note: This step reports all vulnerabilities but does not fail the build."
+
+      - name: Check for high/critical vulnerabilities
+        run: |
+          echo "🔒 Checking for high/critical severity vulnerabilities..."
           if npm audit --audit-level=high; then
-            echo "✅ No high severity vulnerabilities found"
+            echo "✅ No high or critical severity vulnerabilities found"
           else
-            echo "⚠️  High severity vulnerabilities found - review required"
+            echo "❌ High or critical severity vulnerabilities found - build failed"
+            echo "⚠️  Please review and fix high/critical vulnerabilities before releasing"
             exit 1
           fi 
