@@ -81,12 +81,14 @@ class TLDRWP_AI_Service {
      */
     public function call_ai_service( $prompt ) {
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'TLDRWP: Starting AI service call for user: ' . ( is_user_logged_in() ? 'logged-in' : 'non-logged-in' ) );
         }
         
         // Check if WordPress AI Client is available
         if ( ! class_exists( 'WordPress\AI_Client\AI_Client' ) ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: WordPress AI Client class not available' );
             }
             return new \WP_Error( 'ai_client_unavailable', __( 'WordPress AI Client is not available.', 'tldrwp' ) );
@@ -95,12 +97,14 @@ class TLDRWP_AI_Service {
         // Check if credentials are configured
         if ( ! $this->check_ai_plugin() ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: AI credentials not configured' );
             }
             return new \WP_Error( 'no_credentials', __( 'AI credentials are not configured. Please configure them in the WordPress AI plugin settings.', 'tldrwp' ) );
         }
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'TLDRWP: Calling AI Client with prompt length: ' . strlen( $prompt ) );
         }
 
@@ -114,12 +118,14 @@ class TLDRWP_AI_Service {
             // Check if we got a WP_Error
             if ( is_wp_error( $text ) ) {
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     error_log( 'TLDRWP: AI Client returned WP_Error: ' . $text->get_error_message() );
                 }
                 return $text;
             }
 
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: AI Client response received, length: ' . strlen( $text ) );
             }
 
@@ -127,6 +133,7 @@ class TLDRWP_AI_Service {
             
         } catch ( \Throwable $e ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: Exception in AI service call: ' . $e->getMessage() );
             }
             return new \WP_Error( 'ai_generation_failed', __( 'AI generation failed: ', 'tldrwp' ) . $e->getMessage() );
@@ -143,6 +150,7 @@ class TLDRWP_AI_Service {
         // Handle WP_Error
         if ( is_wp_error( $raw_response ) ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: format_ai_response received WP_Error: ' . $raw_response->get_error_message() );
             }
             return '';
@@ -150,12 +158,14 @@ class TLDRWP_AI_Service {
 
         if ( empty( $raw_response ) ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TLDRWP: Raw response is empty' );
             }
             return '';
         }
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'TLDRWP: Formatting response: ' . substr( $raw_response, 0, 200 ) . '...' );
         }
 
@@ -170,6 +180,7 @@ class TLDRWP_AI_Service {
         $response = wpautop( $response );
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'TLDRWP: Final formatted response: ' . substr( $response, 0, 200 ) . '...' );
         }
 

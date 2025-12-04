@@ -1,13 +1,17 @@
 <?php
 /**
- * Plugin Name: TLDRWP AI Block
+ * Plugin Name: TLDRWP
+ * Plugin URI: https://github.com/mathetos/tldrwp
  * Description: Let your readers generate a TL;DR of your content with AI.
  * Version: 0.1.0
  * Author: Matt Cromwell
+ * Author URI: https://mattcromwell.com
  * Requires Plugins: ai
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: tldrwp
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -56,19 +60,19 @@ add_action( 'plugins_loaded', 'tldrwp_init' );
  */
 function tldrwp_action_hooks() {
     // Hook: Before the summary heading
-    do_action( 'tldr_before_summary_heading' );
+    do_action( 'tldrwp_before_summary_heading' );
     
     // Hook: After the summary heading
-    do_action( 'tldr_after_summary_heading' );
+    do_action( 'tldrwp_after_summary_heading' );
     
     // Hook: Before the summary content
-    do_action( 'tldr_before_summary_copy' );
+    do_action( 'tldrwp_before_summary_copy' );
     
     // Hook: After the summary content
-    do_action( 'tldr_after_summary_copy' );
+    do_action( 'tldrwp_after_summary_copy' );
     
     // Hook: Summary footer (after social sharing)
-    do_action( 'tldr_summary_footer' );
+    do_action( 'tldrwp_summary_footer' );
 }
 
 /**

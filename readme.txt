@@ -1,14 +1,14 @@
-=== TLDRWP - AI-Powered Post Summaries ===
+=== TLDRWP ===
 Contributors: mattcromwell
-Tags: ai, artificial intelligence, content, summary, tldr, reading, automation, seo
-Requires at least: 5.0
-Tested up to: 6.4
+Tags: ai, content, summary, tldr, reading
+Requires at least: 6.0
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Automatically generate AI-powered TL;DR summaries for your WordPress posts using the WordPress AI plugin. Perfect for improving reader engagement and content accessibility.
+Generate AI-powered TL;DR summaries for WordPress posts using the WordPress AI plugin.
 
 == Description ==
 
@@ -86,11 +86,11 @@ Currently, summaries are generated automatically. Future versions may include ma
 Yes! TLDRWP provides comprehensive action hooks and filters for developers to customize the output. See the ACTION_HOOKS.md file in the plugin directory for complete documentation and examples.
 
 **Available Action Hooks:**
-* `tldr_before_summary_heading` - Add content before the heading
-* `tldr_after_summary_heading` - Add content after the heading  
-* `tldr_before_summary_copy` - Add content before the summary
-* `tldr_after_summary_copy` - Add content after the summary
-* `tldr_summary_footer` - Add content at the bottom
+* `tldrwp_before_summary_heading` - Add content before the heading
+* `tldrwp_after_summary_heading` - Add content after the heading  
+* `tldrwp_before_summary_copy` - Add content before the summary
+* `tldrwp_after_summary_copy` - Add content after the summary
+* `tldrwp_summary_footer` - Add content at the bottom
 
 **Available Filter Hooks:**
 * `tldrwp_response` - Modify the AI response

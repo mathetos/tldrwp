@@ -183,9 +183,9 @@ class TLDRWP_Settings {
         $post_types = get_post_types( array( 'public' => true ), 'objects' );
         
         foreach ( $post_types as $post_type ) {
-            $checked = in_array( $post_type->name, $enabled_post_types ) ? 'checked' : '';
+            $is_checked = in_array( $post_type->name, $enabled_post_types );
             echo '<label style="display: block; margin-bottom: 5px;">';
-            echo '<input type="checkbox" name="tldrwp_settings[enabled_post_types][]" value="' . esc_attr( $post_type->name ) . '" ' . $checked . '> ';
+            echo '<input type="checkbox" name="tldrwp_settings[enabled_post_types][]" value="' . esc_attr( $post_type->name ) . '" ' . checked( $is_checked, true, false ) . '> ';
             echo esc_html( $post_type->labels->name );
             echo '</label>';
         }
@@ -227,9 +227,9 @@ class TLDRWP_Settings {
      */
     public function enable_social_sharing_callback() {
         $this->refresh_settings();
-        $checked = $this->plugin->settings['enable_social_sharing'] ? 'checked' : '';
+        $is_checked = $this->plugin->settings['enable_social_sharing'];
         echo '<label>';
-        echo '<input type="checkbox" name="tldrwp_settings[enable_social_sharing]" value="1" ' . $checked . '> ';
+        echo '<input type="checkbox" name="tldrwp_settings[enable_social_sharing]" value="1" ' . checked( $is_checked, true, false ) . '> ';
         echo esc_html__( 'Enable social sharing buttons on TL;DR summaries', 'tldrwp' );
         echo '</label>';
     }
@@ -288,7 +288,7 @@ class TLDRWP_Settings {
                     type: 'POST',
                     data: {
                         action: 'tldrwp_test_ai',
-                        nonce: '<?php echo wp_create_nonce( 'tldrwp_ajax_nonce' ); ?>'
+                        nonce: '<?php echo esc_js( wp_create_nonce( 'tldrwp_ajax_nonce' ) ); ?>'
                     },
                     success: function(response) {
                         if (response.success) {

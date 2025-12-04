@@ -423,11 +423,11 @@
          */
         buildSummaryWithHooks(response, socialSharingHTML, actionHooks = {}) {
             // Extract action hook outputs
-            const beforeSummaryHeading = actionHooks.tldr_before_summary_heading || '';
-            const afterSummaryHeading = actionHooks.tldr_after_summary_heading || '';
-            const beforeSummaryCopy = actionHooks.tldr_before_summary_copy || '';
-            const afterSummaryCopy = actionHooks.tldr_after_summary_copy || '';
-            const summaryFooter = actionHooks.tldr_summary_footer || '';
+            const beforeSummaryHeading = actionHooks.tldrwp_before_summary_heading || '';
+            const afterSummaryHeading = actionHooks.tldrwp_after_summary_heading || '';
+            const beforeSummaryCopy = actionHooks.tldrwp_before_summary_copy || '';
+            const afterSummaryCopy = actionHooks.tldrwp_after_summary_copy || '';
+            const summaryFooter = actionHooks.tldrwp_summary_footer || '';
 
             return `
                 <div class="tldrwp-summary">

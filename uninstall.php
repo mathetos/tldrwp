@@ -15,8 +15,9 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 delete_option( 'tldrwp_settings' );
 
 // Delete any post meta that might have been added
-global $wpdb;
-$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_tldrwp_custom_prompt' ) );
+// Use WordPress functions for safe deletion
+delete_post_meta_by_key( '_tldrwp_custom_prompt' );
+delete_post_meta_by_key( '_tldrwp_disabled' );
 
 // Clear any cached data that might have been stored
 wp_cache_flush(); 

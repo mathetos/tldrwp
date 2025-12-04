@@ -135,6 +135,7 @@ class TLDRWP_Public {
         
         // Debug: Log the meta field value
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'TLDRWP Debug - Post ID: ' . $post_id . ', TLDR Disabled: ' . ( $tldr_disabled ? 'true' : 'false' ) );
         }
         
@@ -233,6 +234,7 @@ class TLDRWP_Public {
         
         // Debug: Log the raw response
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log,WordPress.PHP.DevelopmentFunctions.error_log_print_r
             error_log( 'TLDRWP Raw Response: ' . print_r( $raw_response, true ) );
         }
         
@@ -269,11 +271,11 @@ class TLDRWP_Public {
             'article_title' => $article_title,
             'social_sharing_data' => $social_sharing_data,
             'action_hooks' => array(
-                'tldr_before_summary_heading' => $this->get_action_hook_output( 'tldr_before_summary_heading', $response, $article_id, $article_title ),
-                'tldr_after_summary_heading' => $this->get_action_hook_output( 'tldr_after_summary_heading', $response, $article_id, $article_title ),
-                'tldr_before_summary_copy' => $this->get_action_hook_output( 'tldr_before_summary_copy', $response, $article_id, $article_title ),
-                'tldr_after_summary_copy' => $this->get_action_hook_output( 'tldr_after_summary_copy', $response, $article_id, $article_title ),
-                'tldr_summary_footer' => $this->get_action_hook_output( 'tldr_summary_footer', $response, $article_id, $article_title )
+                'tldrwp_before_summary_heading' => $this->get_action_hook_output( 'tldrwp_before_summary_heading', $response, $article_id, $article_title ),
+                'tldrwp_after_summary_heading' => $this->get_action_hook_output( 'tldrwp_after_summary_heading', $response, $article_id, $article_title ),
+                'tldrwp_before_summary_copy' => $this->get_action_hook_output( 'tldrwp_before_summary_copy', $response, $article_id, $article_title ),
+                'tldrwp_after_summary_copy' => $this->get_action_hook_output( 'tldrwp_after_summary_copy', $response, $article_id, $article_title ),
+                'tldrwp_summary_footer' => $this->get_action_hook_output( 'tldrwp_summary_footer', $response, $article_id, $article_title )
             )
         );
 
@@ -396,6 +398,10 @@ class TLDRWP_Public {
      * @return string The hook output
      */
     private function get_action_hook_output( $hook_name, $response, $article_id, $article_title ) {
+        // Ensure hook name starts with plugin prefix for security
+        if ( 0 !== strpos( $hook_name, 'tldrwp_' ) ) {
+            return '';
+        }
         ob_start();
         do_action( $hook_name, $response, $article_id, $article_title );
         return ob_get_clean();

@@ -47,11 +47,15 @@ class TLDRWP_Social_Sharing {
      */
     public function get_share_data() {
         // Verify nonce
-        if ( ! wp_verify_nonce( $_POST['nonce'], 'tldrwp_ajax_nonce' ) ) {
+        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'tldrwp_ajax_nonce' ) ) {
             wp_die( 'Security check failed' );
         }
 
-        $post_id = intval( $_POST['post_id'] );
+        if ( ! isset( $_POST['post_id'] ) ) {
+            wp_send_json_error( 'Missing post ID' );
+        }
+
+        $post_id = intval( wp_unslash( $_POST['post_id'] ) );
         
         if ( ! $post_id || ! get_post( $post_id ) ) {
             wp_send_json_error( 'Invalid post ID' );
